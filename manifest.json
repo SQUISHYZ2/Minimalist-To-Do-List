@@ -1,11 +1,12 @@
 {
     "name" : "My Todo List",
-    "short_name" : "Todo", 
-    "description" : "My own hand-built app", 
+    "short_name" : "Todo",
+    "description" : "My own hand-built app",
     "start_url" : "./index.html",
+    "scope" : "./",
     "display" : "standalone",
-    "background_color" : "#ffffff",
-    "theme_color" : "#4CAF50", 
+    "background_color" : "#07080d",
+    "theme_color" : "#07080d",
     "orientation" : "portrait",
     "icons" : [
         {

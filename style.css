@@ -1,163 +1,588 @@
+/* ==========================================================================
+   Tasks — liquid glass, kept quiet.
+   Everything visual hangs off the tokens in :root, so the dark / light
+   themes below are only a handful of overrides.
+   ========================================================================== */
+
+@property --spin  { syntax: '<angle>';  inherits: false; initial-value: 0deg; }
+@property --light { syntax: '<number>'; inherits: false; initial-value: 0; }
+
 :root {
-    --background: rgba(0, 0, 0, 0.909);
-    --primary-color: rgb(37, 37, 37);
-    --secondary-colr: rgba(128, 128, 128, 0.457);
-    --accent-color: rgb(0, 255, 204);
-    --text-color: white;
+    color-scheme: dark;
+
+    /* surface */
+    --bg: #07080d;
+    --orb-a: rgba(94, 76, 255, .62);
+    --orb-b: rgba(255, 74, 168, .34);
+    --orb-c: rgba(18, 214, 196, .38);
+    --grain-opacity: .07;
+    --grain-blend: overlay;
+
+    /* type */
+    --ink: rgba(255, 255, 255, .95);
+    --ink-2: rgba(255, 255, 255, .68);
+    --ink-3: rgba(255, 255, 255, .56);
+
+    /* glass */
+    --glass-top: rgba(255, 255, 255, .125);
+    --glass-bot: rgba(255, 255, 255, .045);
+    --glass-solid: rgba(38, 40, 58, .92);          /* fallback, no backdrop-filter */
+    --glass-blur: 22px;
+    --edge-hi: rgba(255, 255, 255, .40);
+    --edge-lo: rgba(255, 255, 255, .06);
+    --edge-ring: rgba(255, 255, 255, .09);
+    --pool: rgba(255, 255, 255, .11);              /* light pooling along the lower edge */
+    --rim-a: rgba(255, 255, 255, .62);
+    --rim-b: rgba(255, 255, 255, .26);
+    --specular: .17;
+    --shadow: 0 14px 34px -12px rgba(0, 0, 0, .55), 0 2px 8px rgba(0, 0, 0, .22);
+    --shadow-lift: 0 30px 60px -14px rgba(0, 0, 0, .65), 0 8px 18px rgba(0, 0, 0, .3);
+
+    /* controls */
+    --hover-fill: rgba(255, 255, 255, .10);
+    --solid-bg: rgba(255, 255, 255, .93);
+    --solid-ink: #0b0c14;
+    --focus: rgba(255, 255, 255, .85);
+
+    /* the single splash of colour: thin-film iridescence, reserved for priority */
+    --irid-stops: #ff9bd8, #ffc27a, #f7f58f, #86ffbf, #7fdcff, #a893ff, #ff9bd8;
+    --halo-opacity: .75;
+    --halo-inside: .86;                            /* how much of the halo is cut away under the text */
+    --star-glow: drop-shadow(0 0 5px rgba(255, 150, 220, .65));
+    --star-stroke: url(#irid);
+
+    --radius: 24px;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    --spring: cubic-bezier(.3, 1.45, .45, 1);
 }
 
-*{
-    margin: 0;
-    padding: 0;
+@media (prefers-color-scheme: light) {
+    :root {
+        color-scheme: light;
+        --bg: #eceef6;
+        --orb-a: rgba(150, 132, 255, .78);
+        --orb-b: rgba(255, 150, 206, .62);
+        --orb-c: rgba(110, 226, 210, .66);
+        --grain-opacity: .05;
+        --grain-blend: multiply;
+
+        --ink: rgba(17, 19, 38, .92);
+        --ink-2: rgba(17, 19, 38, .72);
+        --ink-3: rgba(17, 19, 38, .70);
+
+        --glass-top: rgba(255, 255, 255, .72);
+        --glass-bot: rgba(255, 255, 255, .34);
+        --glass-solid: rgba(255, 255, 255, .92);
+        --edge-hi: rgba(255, 255, 255, .98);
+        --edge-lo: rgba(110, 120, 170, .16);
+        --edge-ring: rgba(255, 255, 255, .7);
+        --pool: rgba(255, 255, 255, .55);
+        --rim-a: rgba(255, 255, 255, 1);
+        --rim-b: rgba(255, 255, 255, .6);
+        --specular: .7;
+        --shadow: 0 14px 34px -14px rgba(56, 66, 130, .38), 0 2px 8px rgba(56, 66, 130, .1);
+        --shadow-lift: 0 30px 60px -16px rgba(56, 66, 130, .5), 0 8px 18px rgba(56, 66, 130, .16);
+
+        --hover-fill: rgba(30, 36, 80, .07);
+        --solid-bg: rgba(17, 19, 38, .92);
+        --solid-ink: #fff;
+        --focus: rgba(17, 19, 38, .75);
+
+        --halo-opacity: .95;
+        --halo-inside: .8;
+        --star-glow: drop-shadow(0 1px 3px rgba(120, 70, 200, .45));
+        --star-stroke: rgba(17, 19, 38, .75);     /* pastel fill alone is too faint on light glass */
+    }
 }
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
 
 html {
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 16pt;
-    color: var(--text-color);
+    font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;            /* the priority halo must never widen the mobile layout viewport */
 }
 
 body {
     min-height: 100vh;
-    padding: 10px;
-    background-color: var(--background);
-    display: flex;
-    flex-direction: column;
-    align-items:center;
+    min-height: 100dvh;
+    background: transparent;
+    overflow-x: clip;
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; -webkit-appearance: none; appearance: none; }
+
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+.sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- backdrop: slow colour fields for the glass to refract ---------- */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    background: var(--bg);
+    pointer-events: none;
+}
+
+.orb {
+    position: absolute;
+    width: 78vmax;
+    height: 78vmax;
+    border-radius: 50%;
+    will-change: transform;
+}
+.orb-a { top: -34vmax; left: -26vmax; background: radial-gradient(closest-side, var(--orb-a), transparent); animation: drift-a 38s ease-in-out infinite alternate; }
+.orb-b { top: 16vmax;  right: -38vmax; background: radial-gradient(closest-side, var(--orb-b), transparent); animation: drift-b 46s ease-in-out infinite alternate; }
+.orb-c { bottom: -42vmax; left: -6vmax; background: radial-gradient(closest-side, var(--orb-c), transparent); animation: drift-c 52s ease-in-out infinite alternate; }
+
+@keyframes drift-a { to { transform: translate3d(16vmax, 12vmax, 0) scale(1.12); } }
+@keyframes drift-b { to { transform: translate3d(-18vmax, -8vmax, 0) scale(.92); } }
+@keyframes drift-c { to { transform: translate3d(14vmax, -14vmax, 0) scale(1.1); } }
+
+.grain {
+    position: absolute;
+    inset: 0;
+    opacity: var(--grain-opacity);
+    mix-blend-mode: var(--grain-blend);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 1.2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- the glass itself ---------- */
+
+.glass {
+    --mx: -400px;
+    --my: -400px;
+    --light: 0;
+    position: relative;
+    border-radius: var(--radius);
+    background:
+        radial-gradient(240px circle at var(--mx) var(--my), rgba(255, 255, 255, calc(var(--specular) * var(--light))), transparent 70%),
+        linear-gradient(150deg, var(--glass-top), var(--glass-bot));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(190%) brightness(1.05);
+    backdrop-filter: blur(var(--glass-blur)) saturate(190%) brightness(1.05);
+    box-shadow:
+        inset 0 1px 0 var(--edge-hi),
+        inset 0 -1px 0 var(--edge-lo),
+        inset 1px 0 0 rgba(255, 255, 255, .10),
+        inset 0 0 0 1px var(--edge-ring),
+        inset 0 -18px 22px -20px var(--pool),
+        var(--shadow);
+    transition: --light .35s ease, box-shadow .3s ease;
+}
+.glass:hover { --light: 1; }
+
+/* refractive rim: bright where light would catch the top-left and bottom-right edges */
+.glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--rim-a), transparent 34%, transparent 66%, var(--rim-b));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass { background: var(--glass-solid); }
+}
+
+/* ---------- layout ---------- */
+
+.shell {
+    width: min(560px, 100% - 32px);
+    margin-inline: auto;
+    padding-top: calc(env(safe-area-inset-top, 0px) + clamp(44px, 11vh, 104px));
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 140px);
+}
+
+.masthead { margin-bottom: 30px; padding-inline: 6px; }
+
+.eyebrow {
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--ink-2);
 }
 
 h1 {
-    margin-top: 100px;
-    margin-bottom: 20px;
-    font-size: 3rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    text-align: center;
-    color: var(--accent-color);
+    margin-top: 6px;
+    font-size: clamp(3.4rem, 15vw, 5rem);
+    font-weight: 200;
+    line-height: 1;
+    letter-spacing: -.045em;
+    background: linear-gradient(180deg, var(--ink) 30%, var(--ink-3));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
 }
 
-.wrapper {
-    width: 700px;
-    max-width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.summary {
+    margin-top: 10px;
+    min-height: 1.4em;
+    font-size: .98rem;
+    color: var(--ink-2);
+    letter-spacing: .005em;
 }
+
+/* ---------- composer ---------- */
+
+.composer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 7px 7px 24px;
+    margin-bottom: 22px;
+    border-radius: 999px;
+}
+.composer:focus-within {
+    box-shadow:
+        inset 0 1px 0 var(--edge-hi),
+        inset 0 -1px 0 var(--edge-lo),
+        inset 0 0 0 1px var(--edge-ring),
+        0 0 0 2px var(--focus),
+        0 0 42px -6px rgba(168, 147, 255, .45),
+        var(--shadow);
+}
+.composer.nudge { animation: nudge .38s var(--ease); }
+@keyframes nudge { 20% { transform: translateX(-6px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } }
 
 #todo-input {
-    box-sizing: border-box;
-    padding: 12px 20px;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
+    height: 44px;
     background: none;
-    border: 2px solid var(--accent-color);
-    border-radius: 1000px;
+    border: 0;
     font: inherit;
-    color: var(--text-color);
-    caret-color: var(--accent-color);
+    font-size: 1.0625rem;
+    color: var(--ink);
+    caret-color: var(--ink);
 }
+#todo-input::placeholder { color: var(--ink-3); }
+#todo-input:focus-visible { outline: none; }
 
-#todo-input:focus {
-    outline: none;
+.add {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--solid-bg);
+    color: var(--solid-ink);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 6px 16px -6px rgba(0, 0, 0, .5);
+    transition: transform .25s var(--spring), opacity .25s ease;
 }
+.add:hover { transform: scale(1.07); }
+.add:active { transform: scale(.94); }
+.add:focus-visible { outline-offset: 2px; }
+.composer:not(:has(#todo-input:not(:placeholder-shown))) .add { opacity: .5; }
 
-form{
-    position: relative;
-}
+/* ---------- list ---------- */
 
-#add-button {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-color: var(--accent-color);
-    height: 100%;
-    padding: 0 30px;
-    border: none;
-    border-radius: 1000px;
-    font: inherit;
-    font-weight: 600;
-    color: var(--background);
-    cursor: pointer;
+.todo-list {
+    position: relative;                 /* offsetParent for the drag maths */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    list-style: none;
+    padding: 4px 0;
 }
 
 .todo {
-    margin-bottom: 10px;
-    padding: 0 16px;
-    background-color: var(--primary-color);
-    border-radius: 15px;
+    --radius: 22px;
     display: flex;
     align-items: center;
+    gap: 6px;
+    min-height: 66px;
+    padding: 8px 8px 8px 6px;
+    touch-action: manipulation;
+}
+.todo.enter { animation: enter .5s var(--ease) both; }
+@keyframes enter { from { opacity: 0; transform: translateY(-10px) scale(.96); } }
+
+.todo.leaving {
+    opacity: 0;
+    transform: scale(.94) translateX(28px);
+    transition: opacity .2s ease, transform .2s ease;
+    pointer-events: none;
 }
 
-.todo .todo-text{
-    padding: 15px;
-    padding-right: 0;
-    flex-grow: 1;
-    transition: 200ms ease;
+/* drag handle */
+.grip {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 44px;
+    border-radius: 10px;
+    color: var(--ink-3);
+    cursor: grab;
+    touch-action: none;                 /* let pointer events drive the drag on touch */
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: color .2s ease;
 }
+.grip:hover { color: var(--ink-2); }
+.grip { position: relative; z-index: 1; }   /* stays above the check's enlarged hit area */
+.todo.editing .grip { opacity: .25; pointer-events: none; }
 
-.delete-button {
-    padding: 3px;
-    background: none;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
+/* completion circle */
+.cb {
+    position: absolute;
+    width: 1px; height: 1px;
+    opacity: 0;
+    pointer-events: none;
 }
-
-.delete-button svg {
-    transition: 200ms ease;
-}
-
-.delete-button:hover svg {
-    fill: red;
-}
-
-.custom-checkbox {
-    border: 2px solid var(--accent-color);
+.check {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    margin: 0 6px 0 2px;
     border-radius: 50%;
-    min-height: 20px;
-    min-width: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-shrink: 0;
-    transition: 200ms ease;
+    color: var(--solid-ink);
+    background: linear-gradient(150deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0));
+    box-shadow: inset 0 0 0 1.5px var(--ink-3);
     cursor: pointer;
+    transition: background .3s ease, box-shadow .3s ease, transform .35s var(--spring);
+}
+.check:hover { box-shadow: inset 0 0 0 1.5px var(--ink-2); }
+.check:active { transform: scale(.88); }
+.check { position: relative; }
+.check::after { content: ""; position: absolute; inset: -9px; border-radius: 50%; }   /* 46px touch target */
+.check svg { overflow: visible; }
+.check path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset .35s var(--ease) .05s;
+}
+.cb:focus-visible + .check { outline: 2px solid var(--focus); outline-offset: 3px; }
+.cb:checked + .check {
+    background: var(--solid-bg);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 4px 12px -4px rgba(0, 0, 0, .5);
+}
+.cb:checked + .check path { stroke-dashoffset: 0; }
+
+/* text */
+.todo-body { flex: 1; min-width: 0; padding: 8px 4px; }
+
+.todo-text {
+    font-size: 1.0625rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    cursor: default;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    /* the strike-through draws itself */
+    background: linear-gradient(currentColor, currentColor) no-repeat 0 58% / 0% 1.5px;
+    transition: background-size .4s var(--ease), color .3s ease;
+}
+.todo.done .todo-text { color: var(--ink-3); background-size: 100% 1.5px; }
+/* a finished priority quietens: softer halo, and none of it under the text */
+.todo.priority.done { --halo-opacity: .38; --halo-inside: 1; }
+
+textarea.edit-field {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    resize: none;
+    overflow: hidden;
+    font: inherit;
+    font-size: 1.0625rem;
+    line-height: 1.4;
+    color: var(--ink);
+    caret-color: var(--ink);
+}
+textarea.edit-field:focus-visible { outline: none; }
+.todo.editing .todo-text { display: none; }
+.todo.editing { box-shadow: inset 0 1px 0 var(--edge-hi), inset 0 0 0 1px var(--edge-ring), 0 0 0 2px rgba(255, 255, 255, .26), var(--shadow); }
+
+/* row actions */
+.actions { flex: none; display: flex; align-items: center; gap: 2px; }
+.todo.editing .actions { display: none; }
+
+.act {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--ink-3);
+    transition: background .2s ease, color .2s ease, transform .3s var(--spring);
+}
+.act:hover { background: var(--hover-fill); color: var(--ink); }
+.act:active { transform: scale(.88); }
+.act.del:hover { color: #ff7a8a; }
+
+.act.star[aria-pressed="true"] { color: transparent; }
+.act.star[aria-pressed="true"] svg {
+    fill: url(#irid);
+    stroke: var(--star-stroke);
+    filter: var(--star-glow);
+}
+.act.star.popping svg { animation: pop .5s var(--spring); }
+@keyframes pop { 40% { transform: scale(1.35) rotate(14deg); } }
+
+/* ---------- priority: iridescent glow ---------- */
+
+/* the ring: a 1.5px band of slowly turning thin-film colour */
+.todo.priority::before {
+    padding: 1.5px;
+    background: conic-gradient(from var(--spin), var(--irid-stops));
+    animation: spin 7s linear infinite;
+    z-index: 1;
+}
+/* the halo: the same colours, blurred, then masked so it blooms *outside* the row
+   and only faintly tints the glass under the text */
+.todo.priority::after {
+    --halo: 34px;
+    content: "";
+    position: absolute;
+    inset: calc(var(--halo) * -1);
+    padding: var(--halo);
+    z-index: -1;
+    border-radius: calc(var(--radius) + var(--halo));
+    background: conic-gradient(from var(--spin), var(--irid-stops)) content-box;
+    filter: blur(13px);
+    -webkit-mask: linear-gradient(rgba(0, 0, 0, var(--halo-inside)) 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(rgba(0, 0, 0, var(--halo-inside)) 0 0) content-box exclude, linear-gradient(#000 0 0);
+    opacity: var(--halo-opacity);
+    animation: spin 7s linear infinite;
+    pointer-events: none;
+}
+@keyframes spin { to { --spin: 360deg; } }
+
+/* ---------- drag & drop ---------- */
+
+.todo-list.is-dragging .todo:not(.dragging) { transition: transform .22s var(--ease), --light .35s ease; }
+.todo.dragging {
+    z-index: 5;
+    cursor: grabbing;
+    box-shadow:
+        inset 0 1px 0 var(--edge-hi),
+        inset 0 0 0 1px var(--edge-ring),
+        var(--shadow-lift);
+    transition: box-shadow .2s ease;
+}
+.todo.dragging .grip { cursor: grabbing; color: var(--ink); }
+.todo.dragging.settling { transition: transform .22s var(--ease), box-shadow .22s ease; }
+.todo-list.no-anim .todo { transition: none !important; }
+html.no-select, html.no-select * { user-select: none !important; -webkit-user-select: none !important; cursor: grabbing !important; }
+
+/* ---------- empty state, footer, toast ---------- */
+
+.empty {
+    margin-top: 54px;
+    text-align: center;
+    line-height: 1.7;
+    color: var(--ink-3);
+    animation: enter .6s var(--ease) both;
 }
 
-input[type="checkbox"]:checked ~ .custom-checkbox {
-    background-color: var(--accent-color);
+.foot { display: flex; justify-content: center; margin-top: 22px; }
+.ghost {
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-size: .9rem;
+    color: var(--ink-3);
+    transition: color .2s ease, background .2s ease;
+}
+.ghost:hover { color: var(--ink); background: var(--hover-fill); }
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: max-content;
+    max-width: calc(100% - 32px);
+    padding: 8px 8px 8px 22px;
+    border-radius: 999px;
+    font-size: .95rem;
+    transform: translate(-50%, 24px) scale(.94);
+    opacity: 0;
+    transition: transform .4s var(--spring), opacity .25s ease;
+}
+.toast.show { transform: translate(-50%, 0) scale(1); opacity: 1; }
+.toast button {
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-weight: 600;
+    background: var(--solid-bg);
+    color: var(--solid-ink);
+    transition: transform .25s var(--spring);
+}
+.toast button:hover { transform: scale(1.05); }
+.toast button:active { transform: scale(.95); }
+.toast[hidden], .empty[hidden], .foot[hidden] { display: none; }
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 480px) {
+    .shell { width: calc(100% - 28px); }
+    .todo { gap: 2px; padding-right: 4px; }
+    .grip { width: 22px; }
+    .act { width: 32px; height: 32px; }
+    .actions { gap: 0; }
+    .check { margin-right: 4px; }
+    .todo-text, textarea.edit-field { font-size: 1rem; }
 }
 
-input[type="checkbox"]:checked ~ .custom-checkbox svg {
-    fill: var(--primary-color);
+/* ---------- Windows high contrast / forced colours ---------- */
+
+@media (forced-colors: active) {
+    .glass { border: 1px solid CanvasText; }
+    .glass::before, .todo.priority::after, .backdrop { display: none; }
+    .todo.priority { border: 3px double Highlight; padding: 6px 6px 6px 4px; }
+    .todo.editing { border: 2px solid Highlight; padding: 7px 7px 7px 5px; }
+    .check { border: 2px solid CanvasText; }
+    .cb:checked + .check { background: Highlight; border-color: Highlight; color: HighlightText; }
+    .todo.done .todo-text { text-decoration: line-through; background-image: none; }
+    .add { border: 1px solid ButtonText; }
+    .composer:not(:has(#todo-input:not(:placeholder-shown))) .add { opacity: 1; }
+    .act.star[aria-pressed="true"] svg { fill: Highlight; stroke: Highlight; filter: none; }
+    h1 { -webkit-text-fill-color: CanvasText; color: CanvasText; background: none; }
 }
 
-input[type="checkbox"]:checked ~ .todo-text {
-    text-decoration: line-through;
-    color: var(--secondary-colr);
+@media (forced-colors: active) and (max-width: 480px) {
+    .todo.priority { padding-right: 2px; }   /* 3px border + 2px = 1px border + 4px mobile padding */
+    .todo.editing  { padding-right: 3px; }
 }
 
-input[type="checkbox"] {
-    display: none;
-}
+/* ---------- motion preferences ---------- */
 
-@media(max-width: 500px) {
-    html {
-        font-size: 12pt;
-    }
-
-    #add-button {
-        position: unset;
-        width: 100%;
-        margin-top: 10px;
-        padding: 15px;
-        height: auto;
-    }
-
-    h1 {
-        margin-top: 50px;
-        font-size: 15vw;
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
     }
 }
