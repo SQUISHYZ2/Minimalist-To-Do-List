@@ -1,7 +1,9 @@
 /* ==========================================================================
-   Tasks — liquid glass, kept quiet.
-   Everything visual hangs off the tokens in :root, so the dark / light
-   themes below are only a handful of overrides.
+   Tasks — liquid glass in a garden.
+   Dark: a night sky — royal blue and gold — stars and a full moon behind the glass.
+   Light: a rose garden — pink on dark pink — one great bloom behind the glass.
+   Everything visual hangs off the tokens in :root; the light theme is a
+   second set of the same tokens, so the two modes share every component.
    ========================================================================== */
 
 @property --spin  { syntax: '<angle>';  inherits: false; initial-value: 0deg; }
@@ -10,46 +12,84 @@
 :root {
     color-scheme: dark;
 
-    /* surface */
-    --bg: #07080d;
-    --orb-a: rgba(94, 76, 255, .62);
-    --orb-b: rgba(255, 74, 168, .34);
-    --orb-c: rgba(18, 214, 196, .38);
+    /* sky */
+    --bg: #050a1c;
+    --orb-a: rgba(44, 78, 232, .55);               /* royal blue */
+    --orb-b: rgba(255, 190, 86, .17);              /* gold warmth */
+    --orb-c: rgba(72, 44, 196, .42);               /* indigo */
+    --band: rgba(96, 124, 255, .17);               /* the milky way */
+    --sky: block;                                  /* stars + full moon: shown at night only */
+    --bloom: none;                                 /* the great bloom: shown by day only */
+    --wash: none;                                  /* an extra wash of colour over the base (day only) */
     --grain-opacity: .07;
     --grain-blend: overlay;
 
-    /* type */
-    --ink: rgba(255, 255, 255, .95);
-    --ink-2: rgba(255, 255, 255, .68);
-    --ink-3: rgba(255, 255, 255, .56);
+    /* flora — midnight blossoms with golden hearts */
+    --flora-w: clamp(120px, 17vw, 240px);
+    --petal-in: #aab8ff;
+    --petal-out: #2b3cc2;
+    --petal-edge: rgba(255, 214, 130, .38);
+    --petal2-in: #e2e6ff;
+    --petal2-out: #5b6df2;
+    --core-a: #fff2c6;
+    --core-b: #dfa138;
+    --leaf-a: #2a4696;
+    --leaf-b: #0f2058;
+    --vein: rgba(255, 226, 170, .38);
+    --stem: rgba(78, 108, 200, .55);
+    --spark: #ffd98a;
+    --spark-glow: drop-shadow(0 0 4px rgba(255, 217, 138, .9));
+
+    /* type — warm white so it reads as moonlight, not screen-white */
+    --ink: rgba(255, 249, 238, .96);
+    --ink-2: rgba(255, 249, 238, .80);
+    --ink-3: rgba(255, 249, 238, .62);
+    --ink-hint: var(--ink-2);                      /* the placeholder */
+    --ink-quiet: rgba(255, 249, 238, .88);         /* the empty note and "Clear completed" — bare type that can sit right on the moon */
+    --title-a: #fff6e0;
+    --title-b: #f1c46c;
+    --text-halo: 0 0 2px rgba(5, 10, 28, .9), 0 0 7px rgba(5, 10, 28, .8), 0 0 16px rgba(5, 10, 28, .7), 0 0 30px rgba(5, 10, 28, .5);   /* shade behind type that sits straight on the moon */
+    --title-halo: drop-shadow(0 0 3px rgba(5, 10, 28, .55)) drop-shadow(0 0 14px rgba(5, 10, 28, .6));
 
     /* glass */
-    --glass-top: rgba(255, 255, 255, .125);
-    --glass-bot: rgba(255, 255, 255, .045);
-    --glass-solid: rgba(38, 40, 58, .92);          /* fallback, no backdrop-filter */
+    --glass-top: rgba(190, 205, 255, .14);
+    --glass-bot: rgba(190, 205, 255, .045);
+    --glass-solid: rgba(26, 32, 70, .94);          /* fallback, no backdrop-filter */
     --glass-blur: 22px;
-    --edge-hi: rgba(255, 255, 255, .40);
+    --glass-dim: .62;                              /* how much of the light behind it the glass lets through — keeps type readable over the moon */
+    --edge-hi: rgba(255, 236, 196, .42);
     --edge-lo: rgba(255, 255, 255, .06);
     --edge-ring: rgba(255, 255, 255, .09);
-    --pool: rgba(255, 255, 255, .11);              /* light pooling along the lower edge */
-    --rim-a: rgba(255, 255, 255, .62);
-    --rim-b: rgba(255, 255, 255, .26);
+    --pool: rgba(190, 205, 255, .12);              /* light pooling along the lower edge */
+    --rim-a: rgba(255, 238, 200, .66);
+    --rim-b: rgba(140, 160, 255, .34);
     --specular: .17;
-    --shadow: 0 14px 34px -12px rgba(0, 0, 0, .55), 0 2px 8px rgba(0, 0, 0, .22);
-    --shadow-lift: 0 30px 60px -14px rgba(0, 0, 0, .65), 0 8px 18px rgba(0, 0, 0, .3);
+    --shadow: 0 14px 34px -12px rgba(0, 4, 30, .65), 0 2px 8px rgba(0, 4, 30, .3);
+    --shadow-lift: 0 30px 60px -14px rgba(0, 4, 30, .75), 0 8px 18px rgba(0, 4, 30, .35);
+    --glow: rgba(78, 110, 255, .5);                /* composer focus bloom */
+    --edit-ring: rgba(255, 214, 130, .32);
 
-    /* controls */
-    --hover-fill: rgba(255, 255, 255, .10);
-    --solid-bg: rgba(255, 255, 255, .93);
-    --solid-ink: #0b0c14;
-    --focus: rgba(255, 255, 255, .85);
+    /* controls — gold */
+    --hover-fill: rgba(255, 236, 196, .10);
+    --solid-bg: linear-gradient(145deg, #ffe09a, #e6a93c);
+    --solid-ink: #1b1540;
+    --solid-shadow: inset 0 1px 0 rgba(255, 255, 255, .65), 0 6px 18px -6px rgba(255, 190, 90, .6);
+    --focus: rgba(255, 214, 130, .9);
+    --danger: #ff8a9a;
 
-    /* the single splash of colour: thin-film iridescence, reserved for priority */
-    --irid-stops: #ff9bd8, #ffc27a, #f7f58f, #86ffbf, #7fdcff, #a893ff, #ff9bd8;
+    /* thin-film iridescence, reserved for priority: gold through royal blue */
+    --irid-1: #ffd47a;
+    --irid-2: #fff1c2;
+    --irid-3: #a9d2ff;
+    --irid-4: #5d7dff;
+    --irid-5: #9d8cff;
+    --irid-6: #ffb366;
+    --irid-stops: var(--irid-1), var(--irid-2), var(--irid-3), var(--irid-4), var(--irid-5), var(--irid-6), var(--irid-1);
     --halo-opacity: .75;
     --halo-inside: .86;                            /* how much of the halo is cut away under the text */
-    --star-glow: drop-shadow(0 0 5px rgba(255, 150, 220, .65));
+    --star-glow: drop-shadow(0 0 5px rgba(255, 210, 120, .7));
     --star-stroke: url(#irid);
+    --star-fill: url(#irid);
 
     --radius: 24px;
     --ease: cubic-bezier(.2, .8, .2, 1);
@@ -59,39 +99,91 @@
 @media (prefers-color-scheme: light) {
     :root {
         color-scheme: light;
-        --bg: #eceef6;
-        --orb-a: rgba(150, 132, 255, .78);
-        --orb-b: rgba(255, 150, 206, .62);
-        --orb-c: rgba(110, 226, 210, .66);
+
+        /* rose garden: pink, lit by light pink, anchored by dark pink */
+        --bg: #ffc4dc;
+        --orb-a: rgba(255, 238, 245, .90);         /* light pink */
+        --orb-b: rgba(226, 46, 134, .40);          /* dark pink */
+        --orb-c: rgba(255, 112, 172, .55);         /* pink */
+        --wash: radial-gradient(ellipse 78% 82% at 50% 46%, transparent 52%, rgba(204, 30, 116, .30) 100%);   /* dark pink gathering at the edges */
+        --sky: none;
+        --bloom: block;
         --grain-opacity: .05;
         --grain-blend: multiply;
 
-        --ink: rgba(17, 19, 38, .92);
-        --ink-2: rgba(17, 19, 38, .72);
-        --ink-3: rgba(17, 19, 38, .70);
+        /* the great bloom behind the list — kept in the lighter pinks so type stays readable over it */
+        --bloom-base: #ff8dbb;
+        --bloom-mid: #ffb3d1;
+        --bloom-tip: #ffe3ee;
+        --bloom-edge: rgba(176, 20, 98, .34);
+        --bloom-vein: rgba(196, 30, 112, .20);
+        --bloom-core-a: #ffb7d3;
+        --bloom-core-b: #f283b8;
+        --bloom-stamen: #ffe4ee;                   /* pale pollen, so type lying across the heart of the bloom stays clean */
 
-        --glass-top: rgba(255, 255, 255, .72);
-        --glass-bot: rgba(255, 255, 255, .34);
-        --glass-solid: rgba(255, 255, 255, .92);
-        --edge-hi: rgba(255, 255, 255, .98);
-        --edge-lo: rgba(110, 120, 170, .16);
-        --edge-ring: rgba(255, 255, 255, .7);
-        --pool: rgba(255, 255, 255, .55);
-        --rim-a: rgba(255, 255, 255, 1);
-        --rim-b: rgba(255, 255, 255, .6);
-        --specular: .7;
-        --shadow: 0 14px 34px -14px rgba(56, 66, 130, .38), 0 2px 8px rgba(56, 66, 130, .1);
-        --shadow-lift: 0 30px 60px -16px rgba(56, 66, 130, .5), 0 8px 18px rgba(56, 66, 130, .16);
+        /* flora — pink blossoms on dark-pink leaves */
+        --petal-in: #fff1f7;
+        --petal-out: #ff5fa8;
+        --petal-edge: rgba(160, 16, 90, .24);
+        --petal2-in: #ffffff;
+        --petal2-out: #ff9cc8;
+        --core-a: #ffd3e6;
+        --core-b: #b3135f;
+        --leaf-a: #e4579d;
+        --leaf-b: #a3125c;
+        --vein: rgba(255, 222, 236, .65);
+        --stem: rgba(170, 24, 100, .5);
+        --spark: #ffffff;
+        --spark-glow: drop-shadow(0 0 3px rgba(255, 255, 255, .85));
 
-        --hover-fill: rgba(30, 36, 80, .07);
-        --solid-bg: rgba(17, 19, 38, .92);
+        /* type — dark pink, all the way down */
+        --ink: #4f0a35;
+        --ink-2: #74104c;
+        --ink-3: #861d5b;
+        --ink-hint: var(--ink-3);
+        --ink-quiet: var(--ink-2);                 /* the empty note and "Clear completed" — bare type that can sit right on the bloom */
+        --title-a: #5e0a3e;
+        --title-b: #c2186b;
+        --text-halo: 0 0 3px rgba(255, 226, 238, .95), 0 0 9px rgba(255, 226, 238, .9), 0 0 18px rgba(255, 226, 238, .75);   /* a clearing in the vines and petals behind bare type */
+        --title-halo: drop-shadow(0 0 3px rgba(255, 226, 238, .9)) drop-shadow(0 0 12px rgba(255, 226, 238, .8));
+
+        /* glass — poured from the same pink, edged in light pink */
+        --glass-top: rgba(255, 236, 244, .68);
+        --glass-bot: rgba(255, 208, 228, .40);
+        --glass-solid: rgba(255, 228, 239, .95);
+        --glass-dim: 1.05;
+        --edge-hi: rgba(255, 250, 252, .96);
+        --edge-lo: rgba(196, 40, 120, .20);
+        --edge-ring: rgba(255, 228, 239, .78);
+        --pool: rgba(255, 228, 239, .62);
+        --rim-a: rgba(255, 246, 250, 1);
+        --rim-b: rgba(255, 176, 212, .80);
+        --specular: .62;
+        --shadow: 0 14px 34px -14px rgba(170, 20, 100, .40), 0 2px 8px rgba(170, 20, 100, .10);
+        --shadow-lift: 0 30px 60px -16px rgba(170, 20, 100, .52), 0 8px 18px rgba(170, 20, 100, .16);
+        --glow: rgba(255, 150, 198, .75);
+        --edit-ring: rgba(255, 238, 245, .95);
+
+        /* controls — dark pink, with light pink for the soft touches */
+        --hover-fill: rgba(255, 240, 246, .55);
+        --solid-bg: linear-gradient(145deg, #d42a80, #a10d56);
         --solid-ink: #fff;
-        --focus: rgba(17, 19, 38, .75);
+        --solid-shadow: inset 0 1px 0 rgba(255, 214, 232, .6), 0 6px 16px -6px rgba(161, 13, 86, .6);
+        --focus: rgba(161, 13, 86, .92);
+        --danger: #c40f33;
 
+        /* iridescence: mother-of-pearl, in pinks */
+        --irid-1: #c2186b;
+        --irid-2: #ff7fb8;
+        --irid-3: #fff5f9;
+        --irid-4: #ff9fcb;
+        --irid-5: #e0358a;
+        --irid-6: #ffd3e6;
         --halo-opacity: .95;
         --halo-inside: .8;
-        --star-glow: drop-shadow(0 1px 3px rgba(120, 70, 200, .45));
-        --star-stroke: rgba(17, 19, 38, .75);     /* pastel fill alone is too faint on light glass */
+        --star-glow: drop-shadow(0 1px 3px rgba(190, 30, 110, .45));
+        --star-stroke: rgba(110, 10, 66, .78);     /* pastel fill alone is too faint on light glass */
+        --star-fill: #e23a8e;
     }
 }
 
@@ -134,7 +226,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     inset: 0;
     z-index: -1;
     overflow: hidden;
-    background: var(--bg);
+    background: var(--wash), var(--bg);
     pointer-events: none;
 }
 
@@ -152,6 +244,108 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 @keyframes drift-a { to { transform: translate3d(16vmax, 12vmax, 0) scale(1.12); } }
 @keyframes drift-b { to { transform: translate3d(-18vmax, -8vmax, 0) scale(.92); } }
 @keyframes drift-c { to { transform: translate3d(14vmax, -14vmax, 0) scale(1.1); } }
+
+/* night sky: a faint band of the milky way and two depths of stars */
+.band {
+    position: absolute;
+    left: -30%;
+    right: -30%;
+    top: 22%;
+    height: 56%;
+    display: var(--sky);
+    background: radial-gradient(ellipse 50% 45% at 50% 50%, var(--band), transparent 72%);
+    transform: rotate(-22deg);
+}
+
+.stars {
+    position: absolute;
+    inset: 0;
+    display: var(--sky);
+    background-repeat: repeat;
+}
+.stars-a {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='720' height='720'%3E%3Ccircle cx='171' cy='392' r='0.8' fill='%23ffd98a' opacity='0.78'/%3E%3Ccircle cx='418' cy='436' r='1.2' fill='%23ffe9bd' opacity='0.71'/%3E%3Ccircle cx='169' cy='717' r='0.9' fill='%23dfe8ff' opacity='0.91'/%3E%3Ccircle cx='286' cy='620' r='0.7' fill='%23ffe9bd' opacity='0.53'/%3E%3Ccircle cx='281' cy='11' r='1.1' fill='%23ffe9bd' opacity='0.54'/%3E%3Ccircle cx='31' cy='562' r='1.2' fill='%23ffe9bd' opacity='0.60'/%3E%3Ccircle cx='518' cy='633' r='1.1' fill='%23dfe8ff' opacity='0.96'/%3E%3Ccircle cx='524' cy='415' r='1.3' fill='%23e6eeff' opacity='0.52'/%3E%3Ccircle cx='70' cy='98' r='0.7' fill='%23dfe8ff' opacity='0.98'/%3E%3Ccircle cx='561' cy='616' r='0.8' fill='%23ffe9bd' opacity='0.91'/%3E%3Ccircle cx='253' cy='421' r='1.0' fill='%23ffd98a' opacity='0.95'/%3E%3Ccircle cx='659' cy='21' r='0.7' fill='%23ffd98a' opacity='0.78'/%3E%3Ccircle cx='117' cy='620' r='1.3' fill='%23ffe9bd' opacity='0.95'/%3E%3Ccircle cx='75' cy='472' r='1.0' fill='%23e6eeff' opacity='0.99'/%3E%3Ccircle cx='205' cy='46' r='1.2' fill='%23ffffff' opacity='0.99'/%3E%3Ccircle cx='248' cy='48' r='1.2' fill='%23dfe8ff' opacity='0.46'/%3E%3Ccircle cx='554' cy='628' r='0.5' fill='%23ffffff' opacity='0.79'/%3E%3Ccircle cx='272' cy='422' r='0.9' fill='%23e6eeff' opacity='0.96'/%3E%3Ccircle cx='364' cy='719' r='0.7' fill='%23ffe9bd' opacity='0.49'/%3E%3Ccircle cx='386' cy='683' r='1.3' fill='%23e6eeff' opacity='0.61'/%3E%3Ccircle cx='112' cy='31' r='1.2' fill='%23ffffff' opacity='0.62'/%3E%3Ccircle cx='646' cy='272' r='0.9' fill='%23ffd98a' opacity='0.74'/%3E%3Ccircle cx='624' cy='490' r='0.6' fill='%23ffe9bd' opacity='0.99'/%3E%3Ccircle cx='195' cy='457' r='1.1' fill='%23dfe8ff' opacity='0.97'/%3E%3Ccircle cx='704' cy='375' r='0.9' fill='%23dfe8ff' opacity='0.46'/%3E%3Ccircle cx='711' cy='227' r='0.8' fill='%23ffffff' opacity='0.77'/%3E%3Ccircle cx='43' cy='452' r='0.9' fill='%23e6eeff' opacity='0.82'/%3E%3Ccircle cx='438' cy='201' r='0.9' fill='%23ffd98a' opacity='0.77'/%3E%3Ccircle cx='15' cy='266' r='1.0' fill='%23ffe9bd' opacity='0.61'/%3E%3Ccircle cx='230' cy='262' r='0.8' fill='%23ffe9bd' opacity='0.65'/%3E%3Ccircle cx='190' cy='567' r='0.6' fill='%23ffe9bd' opacity='0.90'/%3E%3Ccircle cx='492' cy='95' r='0.9' fill='%23e6eeff' opacity='0.81'/%3E%3Ccircle cx='172' cy='135' r='0.8' fill='%23ffffff' opacity='0.83'/%3E%3Ccircle cx='433' cy='683' r='1.0' fill='%23ffffff' opacity='0.57'/%3E%3Ccircle cx='58' cy='534' r='0.7' fill='%23e6eeff' opacity='0.76'/%3E%3Ccircle cx='162' cy='87' r='0.9' fill='%23ffe9bd' opacity='0.55'/%3E%3Ccircle cx='132' cy='201' r='1.1' fill='%23ffe9bd' opacity='0.80'/%3E%3Ccircle cx='249' cy='93' r='0.7' fill='%23e6eeff' opacity='0.89'/%3E%3Ccircle cx='335' cy='457' r='0.7' fill='%23ffffff' opacity='0.76'/%3E%3Ccircle cx='663' cy='112' r='0.5' fill='%23ffe9bd' opacity='0.97'/%3E%3Ccircle cx='711' cy='313' r='1.3' fill='%23ffffff' opacity='0.96'/%3E%3Ccircle cx='23' cy='329' r='1.1' fill='%23e6eeff' opacity='0.86'/%3E%3Ccircle cx='392' cy='641' r='1.2' fill='%23e6eeff' opacity='0.92'/%3E%3Ccircle cx='86' cy='176' r='0.5' fill='%23ffe9bd' opacity='0.89'/%3E%3Ccircle cx='665' cy='646' r='1.2' fill='%23ffffff' opacity='0.77'/%3E%3Ccircle cx='346' cy='87' r='0.9' fill='%23ffffff' opacity='0.58'/%3E%3Ccircle cx='378' cy='298' r='1.3' fill='%23e6eeff' opacity='0.79'/%3E%3Ccircle cx='90' cy='700' r='0.9' fill='%23ffffff' opacity='0.90'/%3E%3Ccircle cx='253' cy='142' r='0.9' fill='%23ffffff' opacity='0.90'/%3E%3Ccircle cx='172' cy='197' r='1.2' fill='%23ffffff' opacity='0.52'/%3E%3Ccircle cx='351' cy='411' r='0.8' fill='%23ffffff' opacity='0.87'/%3E%3Ccircle cx='193' cy='380' r='0.8' fill='%23ffffff' opacity='0.71'/%3E%3Ccircle cx='617' cy='558' r='0.5' fill='%23dfe8ff' opacity='0.48'/%3E%3Ccircle cx='702' cy='615' r='0.6' fill='%23e6eeff' opacity='0.73'/%3E%3Ccircle cx='113' cy='52' r='0.8' fill='%23e6eeff' opacity='0.66'/%3E%3Ccircle cx='260' cy='138' r='0.8' fill='%23ffe9bd' opacity='0.52'/%3E%3Ccircle cx='3' cy='521' r='1.1' fill='%23ffffff' opacity='0.76'/%3E%3Ccircle cx='269' cy='435' r='1.1' fill='%23ffffff' opacity='0.66'/%3E%3Ccircle cx='449' cy='311' r='0.8' fill='%23ffd98a' opacity='0.72'/%3E%3Ccircle cx='227' cy='684' r='0.8' fill='%23ffffff' opacity='0.46'/%3E%3Ccircle cx='386' cy='501' r='0.6' fill='%23dfe8ff' opacity='0.68'/%3E%3Ccircle cx='94' cy='20' r='0.8' fill='%23ffe9bd' opacity='0.98'/%3E%3Ccircle cx='569' cy='189' r='0.9' fill='%23ffd98a' opacity='0.52'/%3E%3Ccircle cx='477' cy='639' r='1.1' fill='%23ffd98a' opacity='0.82'/%3E%3Ccircle cx='229' cy='383' r='1.1' fill='%23dfe8ff' opacity='0.84'/%3E%3Ccircle cx='103' cy='557' r='0.5' fill='%23ffffff' opacity='0.50'/%3E%3Ccircle cx='475' cy='271' r='1.2' fill='%23ffffff' opacity='0.64'/%3E%3Ccircle cx='18' cy='83' r='0.9' fill='%23e6eeff' opacity='0.83'/%3E%3Ccircle cx='417' cy='575' r='0.5' fill='%23ffe9bd' opacity='0.87'/%3E%3Ccircle cx='381' cy='172' r='0.9' fill='%23ffe9bd' opacity='0.50'/%3E%3Ccircle cx='44' cy='233' r='1.0' fill='%23ffffff' opacity='0.91'/%3E%3Ccircle cx='719' cy='465' r='0.9' fill='%23dfe8ff' opacity='0.84'/%3E%3Ccircle cx='182' cy='432' r='1.3' fill='%23ffffff' opacity='0.76'/%3E%3Ccircle cx='270' cy='169' r='1.2' fill='%23ffffff' opacity='0.91'/%3E%3Ccircle cx='299' cy='409' r='1.0' fill='%23ffd98a' opacity='0.96'/%3E%3Ccircle cx='348' cy='463' r='1.2' fill='%23ffffff' opacity='0.53'/%3E%3Ccircle cx='359' cy='348' r='1.1' fill='%23ffe9bd' opacity='0.97'/%3E%3Ccircle cx='518' cy='134' r='0.7' fill='%23ffe9bd' opacity='0.56'/%3E%3Ccircle cx='371' cy='673' r='1.2' fill='%23e6eeff' opacity='0.75'/%3E%3Ccircle cx='483' cy='616' r='1.0' fill='%23e6eeff' opacity='0.77'/%3E%3Ccircle cx='640' cy='221' r='0.7' fill='%23ffffff' opacity='0.89'/%3E%3Ccircle cx='124' cy='260' r='0.8' fill='%23ffffff' opacity='0.88'/%3E%3Ccircle cx='301' cy='502' r='1.1' fill='%23ffe9bd' opacity='0.56'/%3E%3Ccircle cx='601' cy='592' r='0.9' fill='%23ffd98a' opacity='0.71'/%3E%3Ccircle cx='52' cy='682' r='1.1' fill='%23ffffff' opacity='0.94'/%3E%3Ccircle cx='337' cy='165' r='0.7' fill='%23ffd98a' opacity='0.84'/%3E%3Ccircle cx='50' cy='157' r='0.7' fill='%23e6eeff' opacity='0.94'/%3E%3Ccircle cx='99' cy='448' r='1.0' fill='%23e6eeff' opacity='0.47'/%3E%3Ccircle cx='122' cy='32' r='0.6' fill='%23ffffff' opacity='0.50'/%3E%3Ccircle cx='85' cy='190' r='1.2' fill='%23dfe8ff' opacity='0.47'/%3E%3Ccircle cx='418' cy='486' r='0.5' fill='%23dfe8ff' opacity='0.63'/%3E%3Ccircle cx='273' cy='56' r='1.0' fill='%23dfe8ff' opacity='0.86'/%3E%3Ccircle cx='281' cy='392' r='0.6' fill='%23ffd98a' opacity='0.60'/%3E%3Ccircle cx='311' cy='316' r='0.9' fill='%23ffe9bd' opacity='0.59'/%3E%3Ccircle cx='678' cy='269' r='1.1' fill='%23e6eeff' opacity='0.87'/%3E%3C/svg%3E");
+    background-size: 720px 720px;
+    animation: twinkle 7s ease-in-out infinite alternate;
+}
+.stars-b {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1100' height='1100'%3E%3Ccircle cx='356' cy='166' r='2.0' fill='%23ffe9bd' opacity='0.49'/%3E%3Ccircle cx='104' cy='641' r='2.2' fill='%23ffffff' opacity='0.57'/%3E%3Ccircle cx='477' cy='77' r='1.4' fill='%23ffe9bd' opacity='0.68'/%3E%3Ccircle cx='136' cy='246' r='1.9' fill='%23ffe9bd' opacity='0.97'/%3E%3Ccircle cx='644' cy='55' r='1.5' fill='%23ffffff' opacity='0.76'/%3E%3Ccircle cx='319' cy='159' r='1.4' fill='%23ffd98a' opacity='0.62'/%3E%3Ccircle cx='199' cy='640' r='1.9' fill='%23ffe9bd' opacity='0.65'/%3E%3Ccircle cx='783' cy='621' r='1.9' fill='%23ffe9bd' opacity='0.72'/%3E%3Ccircle cx='470' cy='346' r='1.9' fill='%23e6eeff' opacity='0.70'/%3E%3Ccircle cx='273' cy='198' r='2.1' fill='%23e6eeff' opacity='0.50'/%3E%3Ccircle cx='578' cy='963' r='2.0' fill='%23ffffff' opacity='0.61'/%3E%3Ccircle cx='130' cy='460' r='2.1' fill='%23dfe8ff' opacity='0.53'/%3E%3Ccircle cx='464' cy='1058' r='1.4' fill='%23e6eeff' opacity='0.76'/%3E%3Ccircle cx='374' cy='385' r='1.8' fill='%23ffffff' opacity='0.89'/%3E%3Ccircle cx='924' cy='1039' r='1.8' fill='%23ffffff' opacity='0.82'/%3E%3Ccircle cx='804' cy='341' r='1.9' fill='%23dfe8ff' opacity='0.82'/%3E%3Ccircle cx='313' cy='424' r='2.0' fill='%23dfe8ff' opacity='0.46'/%3E%3Ccircle cx='391' cy='672' r='1.8' fill='%23e6eeff' opacity='0.57'/%3E%3Ccircle cx='142' cy='272' r='1.7' fill='%23ffffff' opacity='0.93'/%3E%3Ccircle cx='183' cy='442' r='1.6' fill='%23dfe8ff' opacity='0.53'/%3E%3Ccircle cx='950' cy='306' r='1.7' fill='%23dfe8ff' opacity='0.65'/%3E%3Ccircle cx='1054' cy='166' r='1.5' fill='%23ffffff' opacity='0.58'/%3E%3Ccircle cx='13' cy='914' r='1.5' fill='%23ffffff' opacity='0.61'/%3E%3Ccircle cx='461' cy='406' r='1.9' fill='%23ffd98a' opacity='0.97'/%3E%3Ccircle cx='945' cy='1045' r='2.0' fill='%23dfe8ff' opacity='0.86'/%3E%3Ccircle cx='989' cy='858' r='2.2' fill='%23dfe8ff' opacity='0.89'/%3E%3Ccircle cx='438' cy='434' r='1.8' fill='%23ffffff' opacity='0.67'/%3E%3Ccircle cx='74' cy='230' r='1.5' fill='%23ffffff' opacity='0.64'/%3E%3Ccircle cx='113' cy='623' r='1.8' fill='%23ffe9bd' opacity='0.97'/%3E%3Ccircle cx='28' cy='962' r='1.9' fill='%23e6eeff' opacity='0.53'/%3E%3Ccircle cx='1051' cy='663' r='1.8' fill='%23dfe8ff' opacity='0.51'/%3E%3Ccircle cx='1092' cy='513' r='1.8' fill='%23ffffff' opacity='0.50'/%3E%3Ccircle cx='825' cy='814' r='1.8' fill='%23ffe9bd' opacity='0.83'/%3E%3Ccircle cx='25' cy='1046' r='1.8' fill='%23ffe9bd' opacity='0.53'/%3E%3Cpath d='M972 807L973.5 812.2L979 813L973.5 814.4L972 819L971.3 814.4L966 813L971.3 812.2Z' fill='%23ffffff' opacity='.9'/%3E%3Cpath d='M921 744L921.7 749.0L927 750L921.7 751.2L921 756L919.5 751.2L915 750L919.5 749.0Z' fill='%23ffd98a' opacity='.9'/%3E%3Cpath d='M966 397L967.5 401.7L972 403L967.5 403.9L966 409L965.4 403.9L961 403L965.4 401.7Z' fill='%23ffffff' opacity='.9'/%3E%3Cpath d='M835 370L835.7 375.2L841 376L835.7 377.3L835 382L833.6 377.3L829 376L833.6 375.2Z' fill='%23fff1c9' opacity='.9'/%3E%3Cpath d='M862 867L863.6 873.3L870 875L863.6 876.1L862 883L860.8 876.1L854 875L860.8 873.3Z' fill='%23fff1c9' opacity='.9'/%3E%3Cpath d='M244 535L245.3 541.2L252 543L245.3 544.1L244 551L242.5 544.1L236 543L242.5 541.2Z' fill='%23fff1c9' opacity='.9'/%3E%3Cpath d='M846 516L847.0 520.6L852 522L847.0 522.7L846 527L844.9 522.7L840 522L844.9 520.6Z' fill='%23ffffff' opacity='.9'/%3E%3C/svg%3E");
+    background-size: 1100px 1100px;
+    animation: twinkle 11s ease-in-out -4s infinite alternate;
+}
+@keyframes twinkle { from { opacity: .55; } to { opacity: 1; } }
+
+/* the centre-pieces, lying under the list: a full moon by night, one great bloom by day.
+   Both are held back in strength so the type on top of them stays readable. */
+.moon, .bloom {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    height: auto;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+}
+.moon  { width: min(114vmin, 1140px); display: var(--sky); }     /* the disc is two thirds of this; the rest is corona */
+.bloom { width: min(128vmin, 1180px); display: var(--bloom); opacity: .92; }
+
+.mare   { fill: #33353f; opacity: .52; }                          /* the seas */
+.crater { fill: #a6a8ae; opacity: .6; }                            /* a few bright ray craters */
+.limb   { fill: none; stroke: #fff3d4; stroke-width: .6; opacity: .28; }
+
+.bpet    { stroke: var(--bloom-edge); stroke-width: 1.6; }
+.bvein   { fill: none; stroke: var(--bloom-vein); stroke-width: 2; stroke-linecap: round; }
+.bcore   { fill: url(#bloomCore); }
+.bstamen { fill: var(--bloom-stamen); }
+
+.bg stop:nth-child(1) { stop-color: var(--bloom-base); }
+.bg stop:nth-child(2) { stop-color: var(--bloom-mid); }
+.bg stop:nth-child(3) { stop-color: var(--bloom-tip); }
+#bloomCore stop:nth-child(1) { stop-color: var(--bloom-core-a); }
+#bloomCore stop:nth-child(2) { stop-color: var(--bloom-core-b); }
+
+/* flora: the blossoms climbing both walls */
+.flora {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: var(--flora-w);
+    height: 100%;
+}
+.flora-l { left: 0; }
+.flora-r { right: 0; transform: scaleX(-1); }
+
+.flora .stem { fill: none; stroke: var(--stem); stroke-width: 2.4; stroke-linecap: round; }
+.flora .spark {
+    fill: var(--spark);
+    filter: var(--spark-glow);
+    animation: firefly 5s ease-in-out infinite alternate;
+    animation-delay: var(--d, 0s);
+}
+@keyframes firefly { from { opacity: .25; } to { opacity: 1; } }
+
+/* the blossom and leaf are drawn once in <defs> and re-used; these rules style the originals */
+.p1 path { fill: url(#petal);  stroke: var(--petal-edge); stroke-width: .7; }
+.p2 path { fill: url(#petal2); }
+.core    { fill: url(#core); }
+.stamen  { fill: var(--core-b); opacity: .8; }
+.leaf    { fill: url(#leaf); }
+.vein    { fill: none; stroke: var(--vein); stroke-width: 1.1; stroke-linecap: round; }
+
+#petal  stop:nth-child(1) { stop-color: var(--petal-in); }
+#petal  stop:nth-child(2) { stop-color: var(--petal-out); }
+#petal2 stop:nth-child(1) { stop-color: var(--petal2-in); }
+#petal2 stop:nth-child(2) { stop-color: var(--petal2-out); }
+#core   stop:nth-child(1) { stop-color: var(--core-a); }
+#core   stop:nth-child(2) { stop-color: var(--core-b); }
+#leaf   stop:nth-child(1) { stop-color: var(--leaf-a); }
+#leaf   stop:nth-child(2) { stop-color: var(--leaf-b); }
+
+#irid stop:nth-child(1) { stop-color: var(--irid-1); }
+#irid stop:nth-child(2) { stop-color: var(--irid-2); }
+#irid stop:nth-child(3) { stop-color: var(--irid-3); }
+#irid stop:nth-child(4) { stop-color: var(--irid-4); }
+#irid stop:nth-child(5) { stop-color: var(--irid-5); }
+#irid stop:nth-child(6) { stop-color: var(--irid-6); }
 
 .grain {
     position: absolute;
@@ -172,8 +366,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     background:
         radial-gradient(240px circle at var(--mx) var(--my), rgba(255, 255, 255, calc(var(--specular) * var(--light))), transparent 70%),
         linear-gradient(150deg, var(--glass-top), var(--glass-bot));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(190%) brightness(1.05);
-    backdrop-filter: blur(var(--glass-blur)) saturate(190%) brightness(1.05);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(190%) brightness(var(--glass-dim));
+    backdrop-filter: blur(var(--glass-blur)) saturate(190%) brightness(var(--glass-dim));
     box-shadow:
         inset 0 1px 0 var(--edge-hi),
         inset 0 -1px 0 var(--edge-lo),
@@ -220,6 +414,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     letter-spacing: .2em;
     text-transform: uppercase;
     color: var(--ink-2);
+    text-shadow: var(--text-halo);
 }
 
 h1 {
@@ -228,11 +423,12 @@ h1 {
     font-weight: 200;
     line-height: 1;
     letter-spacing: -.045em;
-    background: linear-gradient(180deg, var(--ink) 30%, var(--ink-3));
+    background: linear-gradient(180deg, var(--title-a) 25%, var(--title-b));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
+    filter: var(--title-halo);
 }
 
 .summary {
@@ -241,6 +437,7 @@ h1 {
     font-size: .98rem;
     color: var(--ink-2);
     letter-spacing: .005em;
+    text-shadow: var(--text-halo);
 }
 
 /* ---------- composer ---------- */
@@ -259,7 +456,7 @@ h1 {
         inset 0 -1px 0 var(--edge-lo),
         inset 0 0 0 1px var(--edge-ring),
         0 0 0 2px var(--focus),
-        0 0 42px -6px rgba(168, 147, 255, .45),
+        0 0 42px -6px var(--glow),
         var(--shadow);
 }
 .composer.nudge { animation: nudge .38s var(--ease); }
@@ -276,7 +473,7 @@ h1 {
     color: var(--ink);
     caret-color: var(--ink);
 }
-#todo-input::placeholder { color: var(--ink-3); }
+#todo-input::placeholder { color: var(--ink-hint); }
 #todo-input:focus-visible { outline: none; }
 
 .add {
@@ -288,7 +485,7 @@ h1 {
     border-radius: 50%;
     background: var(--solid-bg);
     color: var(--solid-ink);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 6px 16px -6px rgba(0, 0, 0, .5);
+    box-shadow: var(--solid-shadow);
     transition: transform .25s var(--spring), opacity .25s ease;
 }
 .add:hover { transform: scale(1.07); }
@@ -380,7 +577,7 @@ h1 {
 .cb:focus-visible + .check { outline: 2px solid var(--focus); outline-offset: 3px; }
 .cb:checked + .check {
     background: var(--solid-bg);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 4px 12px -4px rgba(0, 0, 0, .5);
+    box-shadow: var(--solid-shadow);
 }
 .cb:checked + .check path { stroke-dashoffset: 0; }
 
@@ -418,7 +615,7 @@ textarea.edit-field {
 }
 textarea.edit-field:focus-visible { outline: none; }
 .todo.editing .todo-text { display: none; }
-.todo.editing { box-shadow: inset 0 1px 0 var(--edge-hi), inset 0 0 0 1px var(--edge-ring), 0 0 0 2px rgba(255, 255, 255, .26), var(--shadow); }
+.todo.editing { box-shadow: inset 0 1px 0 var(--edge-hi), inset 0 0 0 1px var(--edge-ring), 0 0 0 2px var(--edit-ring), var(--shadow); }
 
 /* row actions */
 .actions { flex: none; display: flex; align-items: center; gap: 2px; }
@@ -435,11 +632,11 @@ textarea.edit-field:focus-visible { outline: none; }
 }
 .act:hover { background: var(--hover-fill); color: var(--ink); }
 .act:active { transform: scale(.88); }
-.act.del:hover { color: #ff7a8a; }
+.act.del:hover { color: var(--danger); }
 
 .act.star[aria-pressed="true"] { color: transparent; }
 .act.star[aria-pressed="true"] svg {
-    fill: url(#irid);
+    fill: var(--star-fill);
     stroke: var(--star-stroke);
     filter: var(--star-glow);
 }
@@ -499,7 +696,8 @@ html.no-select, html.no-select * { user-select: none !important; -webkit-user-se
     margin-top: 54px;
     text-align: center;
     line-height: 1.7;
-    color: var(--ink-3);
+    color: var(--ink-quiet);
+    text-shadow: var(--text-halo);
     animation: enter .6s var(--ease) both;
 }
 
@@ -508,7 +706,8 @@ html.no-select, html.no-select * { user-select: none !important; -webkit-user-se
     padding: 9px 18px;
     border-radius: 999px;
     font-size: .9rem;
-    color: var(--ink-3);
+    color: var(--ink-quiet);
+    text-shadow: var(--text-halo);
     transition: color .2s ease, background .2s ease;
 }
 .ghost:hover { color: var(--ink); background: var(--hover-fill); }
@@ -546,6 +745,9 @@ html.no-select, html.no-select * { user-select: none !important; -webkit-user-se
 /* ---------- small screens ---------- */
 
 @media (max-width: 480px) {
+    :root { --flora-w: 96px; }          /* the blossoms tuck in behind the glass edges */
+    .flora { opacity: .92; }
+    .moon { width: 138vw; }             /* on a phone the disc spans the column, so its light shows round the rows */
     .shell { width: calc(100% - 28px); }
     .todo { gap: 2px; padding-right: 4px; }
     .grip { width: 22px; }

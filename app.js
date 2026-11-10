@@ -36,6 +36,13 @@
      *  State & storage
      * ------------------------------------------------------------------ */
 
+    /* The order of the list: unfinished above finished and, inside each of those, priority first.
+       Ties keep their place, so the order you arrange by hand survives inside every group. */
+    function rank(t) { return (t.completed ? 2 : 0) + (t.priority ? 0 : 1); }
+    function sorted(list) {
+        return list.map((t, i) => [t, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map((x) => x[0]);
+    }
+
     const nodes = new Map();              // todo id -> <li>
     let todos = load();
     let editing = null;                   // { id, finish(commit, refocus) } while a row is being edited
@@ -54,14 +61,14 @@
         try { raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (_) { raw = []; }
         if (!Array.isArray(raw)) return [];
         const seen = new Set();
-        return raw
+        return sorted(raw
             .filter((t) => t && typeof t.text === 'string' && t.text.trim())
             .map((t) => {
                 // Older saves had no ids / priority flag — upgrade them quietly.
                 let id = typeof t.id === 'string' && SAFE_ID.test(t.id) && !seen.has(t.id) ? t.id : uid();
                 seen.add(id);
                 return { id, text: t.text.trim().slice(0, MAX_LEN), completed: !!t.completed, priority: !!t.priority };
-            });
+            }));
     }
 
     function save() {
@@ -159,8 +166,9 @@
         els.foot.hidden = !todos.some((t) => t.completed);
     }
 
-    /* FLIP: run a DOM-changing fn and glide every surviving row from where it was */
-    function withFlip(fn) {
+    /* FLIP: run a DOM-changing fn and glide every surviving row from where it was.
+       `lead` is the row the change is about — it travels over the others, not under them. */
+    function withFlip(fn, lead) {
         const first = new Map();
         for (const [id, li] of nodes) first.set(id, li.getBoundingClientRect().top);
         fn();
@@ -168,11 +176,19 @@
             if (!first.has(id) || li.classList.contains('leaving')) continue;
             const dy = first.get(id) - li.getBoundingClientRect().top;
             if (Math.abs(dy) < 1 || reduceMotion.matches || typeof li.animate !== 'function') continue;
-            li.animate(
-                [{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0)' }],
-                { duration: 380, easing: 'cubic-bezier(.2,.8,.2,1)' }
-            );
+            const frames = [{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0)' }];
+            if (id === lead) frames.forEach((f) => { f.zIndex = 2; });
+            li.animate(frames, { duration: 380, easing: 'cubic-bezier(.2,.8,.2,1)' });
         }
+    }
+
+    /* A task has changed group: save, glide the rows to their new places and
+       leave the keyboard on the control that was used (moving a node drops its focus). */
+    function resettle(id) {
+        const active = document.activeElement;
+        save();
+        withFlip(render, id);
+        if (active && active !== document.activeElement && els.list.contains(active)) active.focus({ preventScroll: true });
     }
 
     /* ------------------------------------------------------------------ *
@@ -182,8 +198,9 @@
     function addTodo(text) {
         const todo = { id: uid(), text: text.slice(0, MAX_LEN), completed: false, priority: false };
         todos.push(todo);
+        todos = sorted(todos);                 // a new task joins the unfinished ones, above anything already done
         save();
-        render({ enter: [todo.id] });
+        withFlip(() => render({ enter: [todo.id] }));
         const li = nodes.get(todo.id);
         if (li) {
             // measure the row at rest — the .enter keyframe starts it at translateY(-10px) scale(.96)
@@ -195,24 +212,26 @@
     }
 
     function toggleDone(id, checked) {
+        flushDrag();                                                // a drop still gliding into place lands first
         const todo = find(id);
         if (!todo) return;
+        const was = todos.indexOf(todo);
         todo.completed = checked;
-        save();
-        syncItem(nodes.get(id), todo);
-        updateChrome();
-        announce(`${todo.text} ${checked ? 'completed' : 'marked as not done'}`);
+        if (checked) { todos.splice(was, 1); todos.push(todo); }    // finished: to the bottom of the list…
+        todos = sorted(todos);                                      // …and un-finished: back up with the rest
+        const moved = todos.indexOf(todo) !== was;
+        resettle(id);
+        announce(`${todo.text} ${checked ? 'completed' : 'marked as not done'}${moved ? (checked ? ', moved down' : ', moved up') : ''}`);
     }
 
     function togglePriority(id) {
+        flushDrag();
         const todo = find(id);
         if (!todo) return;
         todo.priority = !todo.priority;
-        save();
-        const li = nodes.get(id);
-        syncItem(li, todo);
-        li.querySelector('.star').classList.toggle('popping', todo.priority);
-        updateChrome();
+        todos = sorted(todos);
+        resettle(id);
+        nodes.get(id).querySelector('.star').classList.toggle('popping', todo.priority);
         announce(`${todo.text} ${todo.priority ? 'marked as priority' : 'is no longer priority'}`);
     }
 
@@ -278,6 +297,7 @@
                     restoredIds.push(todo.id);
                 }
             }
+            todos = sorted(todos);
             save();
             render({ enter: restoredIds });
         });
@@ -291,7 +311,12 @@
     function moveBy(id, delta) {
         const from = todos.findIndex((t) => t.id === id);
         const to = from + delta;
-        if (from < 0 || to < 0 || to >= todos.length) return;
+        if (from < 0) return;
+        // a task is reordered among its own kind — moving it never un-finishes or re-prioritises it
+        if (to < 0 || to >= todos.length || rank(todos[to]) !== rank(todos[from])) {
+            announce(`${todos[from].text} is at the ${delta < 0 ? 'top' : 'bottom'} of its group`);
+            return;
+        }
         withFlip(() => {
             const [t] = todos.splice(from, 1);
             todos.splice(to, 0, t);
@@ -381,8 +406,14 @@
         const hs = items.map((el) => el.offsetHeight);
         const gap = Math.max(0, tops[1] - (tops[0] + hs[0]));
 
+        // the stretch of rows this one may be dropped among: its own group (see rank)
+        const kind = (el) => { const t = find(el.dataset.id); return t ? rank(t) : -1; };
+        let lo = start, hi = start;
+        while (lo > 0 && kind(items[lo - 1]) === kind(li)) lo--;
+        while (hi < items.length - 1 && kind(items[hi + 1]) === kind(li)) hi++;
+
         drag = {
-            li, grip, items, start, index: start, tops, hs, gap,
+            li, grip, items, start, index: start, tops, hs, gap, lo, hi,
             startY: e.clientY, y: e.clientY, startScroll: window.scrollY,
             maxScroll: Math.max(0, document.documentElement.scrollHeight - window.innerHeight),
             pointerId: e.pointerId, raf: 0, ending: false, settle: null, timer: 0,
@@ -427,10 +458,9 @@
 
     function updateDrag() {
         const d = drag;
-        // keep the lifted row within the list's own extent
-        const last = d.items.length - 1;
-        const minDy = d.tops[0] - d.tops[d.start];
-        const maxDy = d.tops[last] + d.hs[last] - d.hs[d.start] - d.tops[d.start];
+        // keep the lifted row within its own group
+        const minDy = d.tops[d.lo] - d.tops[d.start];
+        const maxDy = d.tops[d.hi] + d.hs[d.hi] - d.hs[d.start] - d.tops[d.start];
         const dy = Math.max(minDy, Math.min(maxDy, d.y - d.startY + (window.scrollY - d.startScroll)));
         d.li.style.transform = `translate3d(0, ${dy}px, 0) scale(1.025)`;
 
@@ -479,6 +509,7 @@
             settled = true;
             clearTimeout(d.timer);
             els.list.classList.add('no-anim');
+            let resync = false;
             try {
                 const dragged = find(d.li.dataset.id);
                 if (dragged && target !== d.start && d.li.isConnected && !d.li.classList.contains('leaving')) {
@@ -487,7 +518,9 @@
                     const byId = new Map(todos.map((t) => [t.id, t]));
                     const ordered = [...els.list.children].map((el) => byId.get(el.dataset.id)).filter(Boolean);
                     if (ordered.length === todos.length) {
-                        todos = ordered;
+                        // a drop stays inside its group; sorting holds that even if the list changed during the glide
+                        todos = sorted(ordered);
+                        resync = todos.some((t, i) => t !== ordered[i]);
                         save();
                         announce(`${dragged.text}, position ${todos.indexOf(dragged) + 1} of ${todos.length}`);
                     }
@@ -501,6 +534,7 @@
                 els.list.classList.remove('no-anim');
                 if (drag === d) drag = null;
             }
+            if (resync) render();
         };
         d.settle = settle;
 

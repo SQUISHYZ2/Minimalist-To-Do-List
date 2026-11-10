@@ -1,7 +1,7 @@
 // Offline support: pre-cache the app shell, then serve network-first
 // (so edits show up as soon as you're online) with the cache as the safety net.
 
-const CACHE_NAME = 'todo-app-v4';
+const CACHE_NAME = 'todo-app-v6';
 const APP_SHELL = [
     './',
     './index.html',

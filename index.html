@@ -6,8 +6,8 @@
     <title>Tasks</title>
     <meta name="description" content="A quiet, glassy to-do list.">
     <meta name="color-scheme" content="dark light">
-    <meta name="theme-color" content="#07080d" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="#eceef6" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#050a1c" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#ffc4dc" media="(prefers-color-scheme: light)">
 
     <link rel="stylesheet" href="style.css">
     <script src="app.js" defer></script>
@@ -21,26 +21,282 @@
     <meta name="apple-mobile-web-app-title" content="Tasks">
 </head>
 <body>
+    <!-- shared paint: the priority star's iridescence, the blossom + leaf the borders are built from, and the bloom + moon behind the list -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <defs>
+            <linearGradient id="irid" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0"/>
+                <stop offset=".25"/>
+                <stop offset=".5"/>
+                <stop offset=".7"/>
+                <stop offset=".85"/>
+                <stop offset="1"/>
+            </linearGradient>
+
+            <radialGradient id="petal"  gradientUnits="userSpaceOnUse" cx="0" cy="0" r="37"><stop offset=".12"/><stop offset="1"/></radialGradient>
+            <radialGradient id="petal2" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="21"><stop offset=".1"/><stop offset="1"/></radialGradient>
+            <radialGradient id="core"   gradientUnits="userSpaceOnUse" cx="-1.6" cy="-1.6" r="7.5"><stop offset="0"/><stop offset="1"/></radialGradient>
+            <linearGradient id="leaf"   gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="40" y2="0"><stop offset="0"/><stop offset="1"/></linearGradient>
+
+            <g id="fl">
+                <g class="p1">
+                    <path d="M0 0C-10-10-15-27 0-37C15-27 10-10 0 0Z"/>
+                    <path d="M0 0C-10-10-15-27 0-37C15-27 10-10 0 0Z" transform="rotate(72)"/>
+                    <path d="M0 0C-10-10-15-27 0-37C15-27 10-10 0 0Z" transform="rotate(144)"/>
+                    <path d="M0 0C-10-10-15-27 0-37C15-27 10-10 0 0Z" transform="rotate(216)"/>
+                    <path d="M0 0C-10-10-15-27 0-37C15-27 10-10 0 0Z" transform="rotate(288)"/>
+                </g>
+                <g class="p2" transform="rotate(36) scale(.56)">
+                    <path d="M0 0C-10-10-15-27 0-37C15-27 10-10 0 0Z"/>
+                    <path d="M0 0C-10-10-15-27 0-37C15-27 10-10 0 0Z" transform="rotate(72)"/>
+                    <path d="M0 0C-10-10-15-27 0-37C15-27 10-10 0 0Z" transform="rotate(144)"/>
+                    <path d="M0 0C-10-10-15-27 0-37C15-27 10-10 0 0Z" transform="rotate(216)"/>
+                    <path d="M0 0C-10-10-15-27 0-37C15-27 10-10 0 0Z" transform="rotate(288)"/>
+                </g>
+                <circle class="core" r="6"/>
+                <g class="stamen">
+                    <circle cx="0" cy="-9" r="1.2"/>
+                    <circle cx="8.6" cy="-2.8" r="1.2"/>
+                    <circle cx="5.3" cy="7.3" r="1.2"/>
+                    <circle cx="-5.3" cy="7.3" r="1.2"/>
+                    <circle cx="-8.6" cy="-2.8" r="1.2"/>
+                </g>
+            </g>
+            <g id="lf">
+                <path class="leaf" d="M0 0C8-15 27-19 40-7C30 8 13 12 0 0Z"/>
+                <path class="vein" d="M3-1L33-5.5"/>
+            </g>
+
+            <!-- the centre-pieces: one bloom by day, the full moon by night -->
+            <linearGradient id="bloom1" class="bg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="-480"><stop offset=".16"/><stop offset=".62"/><stop offset="1"/></linearGradient>
+            <linearGradient id="bloom2" class="bg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="-372"><stop offset=".16"/><stop offset=".62"/><stop offset="1"/></linearGradient>
+            <linearGradient id="bloom3" class="bg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="-262"><stop offset=".16"/><stop offset=".62"/><stop offset="1"/></linearGradient>
+            <linearGradient id="bloom4" class="bg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="-156"><stop offset=".16"/><stop offset=".62"/><stop offset="1"/></linearGradient>
+            <radialGradient id="bloomCore" gradientUnits="userSpaceOnUse" cx="-10" cy="-12" r="66"><stop offset="0"/><stop offset="1"/></radialGradient>
+            <g id="bp1"><path class="bpet" fill="url(#bloom1)" d="M0 0C-88.3 -96 -111.4 -336 0 -480C111.4 -336 88.3 -96 0 0Z"/><path class="bvein" d="M0 -76.8L0 -384"/></g>
+            <g id="bp2"><path class="bpet" fill="url(#bloom2)" d="M0 0C-77.3 -74.4 -97.4 -260.4 0 -372C97.4 -260.4 77.3 -74.4 0 0Z"/><path class="bvein" d="M0 -59.5L0 -297.6"/></g>
+            <g id="bp3"><path class="bpet" fill="url(#bloom3)" d="M0 0C-62.6 -52.4 -78.9 -183.4 0 -262C78.9 -183.4 62.6 -52.4 0 0Z"/><path class="bvein" d="M0 -41.9L0 -209.6"/></g>
+            <g id="bp4"><path class="bpet" fill="url(#bloom4)" d="M0 0C-42.3 -31.2 -53.4 -109.2 0 -156C53.4 -109.2 42.3 -31.2 0 0Z"/><path class="bvein" d="M0 -25L0 -124.8"/></g>
+
+            <radialGradient id="moonGlow"><stop offset=".655" stop-color="#f6e7bd" stop-opacity=".36"/><stop offset=".71" stop-color="#f6e2b0" stop-opacity=".22"/><stop offset=".80" stop-color="#f3d9a0" stop-opacity=".10"/><stop offset=".91" stop-color="#f0d090" stop-opacity=".035"/><stop offset="1" stop-color="#f0d090" stop-opacity="0"/></radialGradient>
+            <radialGradient id="moonDisc" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#7b7d84"/><stop offset=".72" stop-color="#74767d"/><stop offset="1" stop-color="#696c75"/></radialGradient>
+            <radialGradient id="moonLimb"><stop offset=".90" stop-color="#fff1cf" stop-opacity="0"/><stop offset="1" stop-color="#fff1cf" stop-opacity=".16"/></radialGradient>
+            <clipPath id="moonClip"><circle r="100"/></clipPath>
+            <filter id="moonSoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.6"/></filter>
+            <filter id="moonFine" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation=".9"/></filter>
+        </defs>
+    </svg>
+
     <div class="backdrop" aria-hidden="true">
         <span class="orb orb-a"></span>
         <span class="orb orb-b"></span>
         <span class="orb orb-c"></span>
+        <span class="band"></span>
+        <span class="stars stars-a"></span>
+        <span class="stars stars-b"></span>
+        <svg class="moon" viewBox="-150 -150 300 300" focusable="false">
+            <circle r="150" fill="url(#moonGlow)"/>
+            <circle r="100" fill="url(#moonDisc)"/>
+            <g clip-path="url(#moonClip)">
+                <g class="mare" filter="url(#moonSoft)">
+                    <ellipse cx="-30" cy="-42" rx="29" ry="22" transform="rotate(-18 -30 -42)"/>
+                    <ellipse cx="20" cy="-38" rx="16" ry="14"/>
+                    <ellipse cx="40" cy="-12" rx="20" ry="14" transform="rotate(30 40 -12)"/>
+                    <ellipse cx="-60" cy="-2" rx="17" ry="36" transform="rotate(8 -60 -2)"/>
+                    <ellipse cx="-26" cy="36" rx="21" ry="13" transform="rotate(-14 -26 36)"/>
+                    <ellipse cx="-50" cy="34" rx="9" ry="9"/>
+                    <ellipse cx="56" cy="18" rx="10" ry="15" transform="rotate(-12 56 18)"/>
+                    <ellipse cx="68" cy="-30" rx="9" ry="7"/>
+                    <ellipse cx="38" cy="12" rx="9" ry="7" transform="rotate(20 38 12)"/>
+                    <ellipse cx="-4" cy="-8" rx="9" ry="6" transform="rotate(35 -4 -8)"/>
+                </g>
+                <g class="crater" filter="url(#moonFine)">
+                    <circle cx="-10" cy="68" r="3.4"/><circle cx="-32" cy="2" r="2.6"/><circle cx="-56" cy="-10" r="1.8"/>
+                    <circle cx="-66" cy="-34" r="1.9"/><circle cx="26" cy="54" r="2.2"/><circle cx="12" cy="80" r="1.7"/>
+                    <circle cx="6" cy="34" r="1.8"/><circle cx="-2" cy="-76" r="1.9"/><circle cx="74" cy="6" r="1.6"/>
+                </g>
+                <circle r="100" fill="url(#moonLimb)"/>
+            </g>
+            <circle class="limb" r="99.6"/>
+        </svg>
+        <svg class="bloom" viewBox="-500 -500 1000 1000" focusable="false">
+            <use href="#bp1" transform="rotate(0)"/>
+            <use href="#bp1" transform="rotate(25.7)"/>
+            <use href="#bp1" transform="rotate(51.4)"/>
+            <use href="#bp1" transform="rotate(77.1)"/>
+            <use href="#bp1" transform="rotate(102.9)"/>
+            <use href="#bp1" transform="rotate(128.6)"/>
+            <use href="#bp1" transform="rotate(154.3)"/>
+            <use href="#bp1" transform="rotate(180)"/>
+            <use href="#bp1" transform="rotate(205.7)"/>
+            <use href="#bp1" transform="rotate(231.4)"/>
+            <use href="#bp1" transform="rotate(257.1)"/>
+            <use href="#bp1" transform="rotate(282.9)"/>
+            <use href="#bp1" transform="rotate(308.6)"/>
+            <use href="#bp1" transform="rotate(334.3)"/>
+            <use href="#bp2" transform="rotate(12.9)"/>
+            <use href="#bp2" transform="rotate(38.6)"/>
+            <use href="#bp2" transform="rotate(64.3)"/>
+            <use href="#bp2" transform="rotate(90)"/>
+            <use href="#bp2" transform="rotate(115.7)"/>
+            <use href="#bp2" transform="rotate(141.4)"/>
+            <use href="#bp2" transform="rotate(167.1)"/>
+            <use href="#bp2" transform="rotate(192.9)"/>
+            <use href="#bp2" transform="rotate(218.6)"/>
+            <use href="#bp2" transform="rotate(244.3)"/>
+            <use href="#bp2" transform="rotate(270)"/>
+            <use href="#bp2" transform="rotate(295.7)"/>
+            <use href="#bp2" transform="rotate(321.4)"/>
+            <use href="#bp2" transform="rotate(347.1)"/>
+            <use href="#bp3" transform="rotate(0)"/>
+            <use href="#bp3" transform="rotate(30)"/>
+            <use href="#bp3" transform="rotate(60)"/>
+            <use href="#bp3" transform="rotate(90)"/>
+            <use href="#bp3" transform="rotate(120)"/>
+            <use href="#bp3" transform="rotate(150)"/>
+            <use href="#bp3" transform="rotate(180)"/>
+            <use href="#bp3" transform="rotate(210)"/>
+            <use href="#bp3" transform="rotate(240)"/>
+            <use href="#bp3" transform="rotate(270)"/>
+            <use href="#bp3" transform="rotate(300)"/>
+            <use href="#bp3" transform="rotate(330)"/>
+            <use href="#bp4" transform="rotate(18)"/>
+            <use href="#bp4" transform="rotate(54)"/>
+            <use href="#bp4" transform="rotate(90)"/>
+            <use href="#bp4" transform="rotate(126)"/>
+            <use href="#bp4" transform="rotate(162)"/>
+            <use href="#bp4" transform="rotate(198)"/>
+            <use href="#bp4" transform="rotate(234)"/>
+            <use href="#bp4" transform="rotate(270)"/>
+            <use href="#bp4" transform="rotate(306)"/>
+            <use href="#bp4" transform="rotate(342)"/>
+            <circle class="bcore" r="60"/>
+            <g class="bstamen"><circle cx="44" cy="0" r="3.4"/><circle cx="39.6" cy="19.1" r="3.4"/><circle cx="27.4" cy="34.4" r="3.4"/><circle cx="9.8" cy="42.9" r="3.4"/><circle cx="-9.8" cy="42.9" r="3.4"/><circle cx="-27.4" cy="34.4" r="3.4"/><circle cx="-39.6" cy="19.1" r="3.4"/><circle cx="-44" cy="0" r="3.4"/><circle cx="-39.6" cy="-19.1" r="3.4"/><circle cx="-27.4" cy="-34.4" r="3.4"/><circle cx="-9.8" cy="-42.9" r="3.4"/><circle cx="9.8" cy="-42.9" r="3.4"/><circle cx="27.4" cy="-34.4" r="3.4"/><circle cx="39.6" cy="-19.1" r="3.4"/><circle cx="25.4" cy="9.2" r="3"/><circle cx="13.5" cy="23.4" r="3"/><circle cx="-4.7" cy="26.6" r="3"/><circle cx="-20.7" cy="17.4" r="3"/><circle cx="-27" cy="0" r="3"/><circle cx="-20.7" cy="-17.4" r="3"/><circle cx="-4.7" cy="-26.6" r="3"/><circle cx="13.5" cy="-23.4" r="3"/><circle cx="25.4" cy="-9.2" r="3"/><circle cx="7.8" cy="7.8" r="2.6"/><circle cx="-7.8" cy="7.8" r="2.6"/><circle cx="-7.8" cy="-7.8" r="2.6"/><circle cx="7.8" cy="-7.8" r="2.6"/></g>
+        </svg>
+        <svg class="flora flora-l" viewBox="0 0 260 1200" preserveAspectRatio="xMinYMid slice" focusable="false">
+            <path class="stem" d="M28 1240 C1 1141 31 1057 88 958 C132 863 79 782 52 687 C-12 588 92 502 24 403 C89 306 84 223 63 126 C79 19 -32 -73 16 -181"/>
+            <path class="stem" d="M11 1240 C5 1143 -18 1059 13 962 C83 878 98 805 29 721 C77 643 77 576 48 498 C23 404 43 323 81 229 C52 132 4 49 64 -48 C101 -144 52 -227 66 -323"/>
+            <path class="stem" d="M44 1240 C62 1148 130 1069 91 977 C59 868 -50 774 8 664 C-15 579 152 506 87 421 C123 326 40 245 93 150 C58 57 -41 -22 14 -114"/>
+            <use href="#lf" transform="translate(1 187) rotate(7) scale(0.90)"/>
+            <use href="#lf" transform="translate(50 784) rotate(-46) scale(0.92)"/>
+            <use href="#lf" transform="translate(28 988) rotate(-24) scale(0.92)"/>
+            <use href="#lf" transform="translate(40 782) rotate(-48) scale(0.92)"/>
+            <use href="#lf" transform="translate(23 381) rotate(156) scale(0.85)"/>
+            <use href="#lf" transform="translate(42 730) rotate(-15) scale(1.33)"/>
+            <use href="#lf" transform="translate(43 1069) rotate(142) scale(1.30)"/>
+            <use href="#lf" transform="translate(62 203) rotate(29) scale(0.91)"/>
+            <use href="#lf" transform="translate(107 733) rotate(171) scale(0.82)"/>
+            <use href="#lf" transform="translate(74 862) rotate(-29) scale(1.13)"/>
+            <use href="#lf" transform="translate(17 882) rotate(128) scale(1.11)"/>
+            <use href="#lf" transform="translate(83 319) rotate(230) scale(0.81)"/>
+            <use href="#lf" transform="translate(19 37) rotate(-39) scale(1.11)"/>
+            <use href="#lf" transform="translate(6 1100) rotate(58) scale(1.18)"/>
+            <use href="#lf" transform="translate(39 5) rotate(-58) scale(1.19)"/>
+            <use href="#lf" transform="translate(62 774) rotate(-2) scale(0.98)"/>
+            <use href="#lf" transform="translate(68 659) rotate(28) scale(1.21)"/>
+            <use href="#lf" transform="translate(74 1131) rotate(-18) scale(1.30)"/>
+            <use href="#lf" transform="translate(75 972) rotate(44) scale(1.14)"/>
+            <use href="#lf" transform="translate(33 739) rotate(-50) scale(1.35)"/>
+            <use href="#lf" transform="translate(91 457) rotate(28) scale(1.04)"/>
+            <use href="#lf" transform="translate(56 920) rotate(-56) scale(1.06)"/>
+            <use href="#fl" transform="translate(54 6) rotate(221) scale(0.74)"/>
+            <use href="#fl" transform="translate(4 128) rotate(108) scale(0.81)"/>
+            <use href="#fl" transform="translate(1 197) rotate(326) scale(0.90)"/>
+            <use href="#fl" transform="translate(19 279) rotate(118) scale(1.02)"/>
+            <use href="#fl" transform="translate(1 362) rotate(290) scale(0.99)"/>
+            <use href="#fl" transform="translate(87 459) rotate(210) scale(0.60)"/>
+            <use href="#fl" transform="translate(-2 507) rotate(301) scale(1.05)"/>
+            <use href="#fl" transform="translate(56 620) rotate(100) scale(0.89)"/>
+            <use href="#fl" transform="translate(20 664) rotate(77) scale(0.80)"/>
+            <use href="#fl" transform="translate(42 760) rotate(114) scale(0.78)"/>
+            <use href="#fl" transform="translate(110 868) rotate(27) scale(0.57)"/>
+            <use href="#fl" transform="translate(86 904) rotate(255) scale(0.48)"/>
+            <use href="#fl" transform="translate(7 1017) rotate(7) scale(1.06)"/>
+            <use href="#fl" transform="translate(20 1075) rotate(299) scale(0.71)"/>
+            <use href="#fl" transform="translate(-2 1163) rotate(227) scale(0.89)"/>
+            <use href="#fl" transform="translate(63 534) rotate(291) scale(0.52)"/>
+            <use href="#fl" transform="translate(68 1168) rotate(171) scale(0.42)"/>
+            <use href="#fl" transform="translate(1 202) rotate(257) scale(0.48)"/>
+            <use href="#fl" transform="translate(27 202) rotate(251) scale(0.46)"/>
+            <use href="#fl" transform="translate(61 625) rotate(142) scale(0.55)"/>
+            <use href="#fl" transform="translate(91 962) rotate(336) scale(0.40)"/>
+            <use href="#fl" transform="translate(13 876) rotate(225) scale(0.48)"/>
+            <use href="#fl" transform="translate(38 1108) rotate(317) scale(0.51)"/>
+            <use href="#fl" transform="translate(94 968) rotate(234) scale(0.48)"/>
+            <use href="#fl" transform="translate(72 234) rotate(231) scale(0.56)"/>
+            <circle class="spark" cx="113" cy="256" r="2.3" style="--d:5.9s"/>
+            <circle class="spark" cx="147" cy="644" r="2.1" style="--d:1.9s"/>
+            <circle class="spark" cx="138" cy="1027" r="1.6" style="--d:0.5s"/>
+            <circle class="spark" cx="77" cy="660" r="2.1" style="--d:2.9s"/>
+            <circle class="spark" cx="24" cy="971" r="1.3" style="--d:4.8s"/>
+            <circle class="spark" cx="42" cy="402" r="2.1" style="--d:0.8s"/>
+            <circle class="spark" cx="39" cy="620" r="2.1" style="--d:5.0s"/>
+            <circle class="spark" cx="110" cy="1135" r="1.8" style="--d:5.7s"/>
+            <circle class="spark" cx="31" cy="266" r="1.8" style="--d:1.7s"/>
+        </svg>
+        <svg class="flora flora-r" viewBox="0 0 260 1200" preserveAspectRatio="xMinYMid slice" focusable="false">
+            <path class="stem" d="M47 1240 C41 1126 19 1029 86 916 C28 835 89 767 60 686 C48 593 56 513 54 420 C87 338 5 268 25 186 C-37 91 67 11 27 -83"/>
+            <path class="stem" d="M34 1240 C30 1138 93 1050 62 948 C75 833 32 735 40 621 C59 515 -4 424 40 317 C-5 218 41 133 65 34 C110 -55 -27 -131 15 -220"/>
+            <path class="stem" d="M15 1240 C21 1159 -22 1090 11 1009 C-44 922 98 846 58 759 C87 650 83 557 37 449 C0 357 39 279 33 188 C92 99 89 23 76 -66"/>
+            <use href="#lf" transform="translate(68 1208) rotate(-53) scale(0.81)"/>
+            <use href="#lf" transform="translate(82 1206) rotate(37) scale(1.10)"/>
+            <use href="#lf" transform="translate(104 403) rotate(57) scale(0.91)"/>
+            <use href="#lf" transform="translate(1 212) rotate(52) scale(0.92)"/>
+            <use href="#lf" transform="translate(4 177) rotate(5) scale(0.94)"/>
+            <use href="#lf" transform="translate(45 529) rotate(-19) scale(1.25)"/>
+            <use href="#lf" transform="translate(91 488) rotate(23) scale(1.15)"/>
+            <use href="#lf" transform="translate(15 484) rotate(33) scale(1.10)"/>
+            <use href="#lf" transform="translate(56 768) rotate(-20) scale(1.26)"/>
+            <use href="#lf" transform="translate(25 61) rotate(7) scale(0.93)"/>
+            <use href="#lf" transform="translate(48 535) rotate(206) scale(1.01)"/>
+            <use href="#lf" transform="translate(55 1070) rotate(-36) scale(0.90)"/>
+            <use href="#lf" transform="translate(36 65) rotate(24) scale(1.18)"/>
+            <use href="#lf" transform="translate(48 633) rotate(-24) scale(0.85)"/>
+            <use href="#lf" transform="translate(98 597) rotate(33) scale(1.13)"/>
+            <use href="#lf" transform="translate(19 407) rotate(-24) scale(0.99)"/>
+            <use href="#lf" transform="translate(30 1005) rotate(-3) scale(0.94)"/>
+            <use href="#lf" transform="translate(15 238) rotate(-28) scale(1.08)"/>
+            <use href="#lf" transform="translate(5 115) rotate(8) scale(1.27)"/>
+            <use href="#lf" transform="translate(24 277) rotate(58) scale(0.82)"/>
+            <use href="#lf" transform="translate(63 424) rotate(-42) scale(0.85)"/>
+            <use href="#lf" transform="translate(62 830) rotate(155) scale(1.30)"/>
+            <use href="#fl" transform="translate(-1 30) rotate(328) scale(1.20)"/>
+            <use href="#fl" transform="translate(-4 86) rotate(50) scale(1.15)"/>
+            <use href="#fl" transform="translate(22 200) rotate(205) scale(0.94)"/>
+            <use href="#fl" transform="translate(76 285) rotate(213) scale(0.71)"/>
+            <use href="#fl" transform="translate(-2 342) rotate(308) scale(0.91)"/>
+            <use href="#fl" transform="translate(17 418) rotate(223) scale(0.83)"/>
+            <use href="#fl" transform="translate(83 519) rotate(130) scale(0.63)"/>
+            <use href="#fl" transform="translate(61 609) rotate(112) scale(0.86)"/>
+            <use href="#fl" transform="translate(110 705) rotate(47) scale(0.75)"/>
+            <use href="#fl" transform="translate(67 758) rotate(14) scale(0.82)"/>
+            <use href="#fl" transform="translate(58 842) rotate(193) scale(0.82)"/>
+            <use href="#fl" transform="translate(16 914) rotate(114) scale(0.75)"/>
+            <use href="#fl" transform="translate(76 1009) rotate(149) scale(0.70)"/>
+            <use href="#fl" transform="translate(8 1081) rotate(160) scale(1.01)"/>
+            <use href="#fl" transform="translate(76 1160) rotate(348) scale(0.70)"/>
+            <use href="#fl" transform="translate(62 645) rotate(219) scale(0.47)"/>
+            <use href="#fl" transform="translate(98 1119) rotate(155) scale(0.53)"/>
+            <use href="#fl" transform="translate(84 58) rotate(138) scale(0.47)"/>
+            <use href="#fl" transform="translate(3 51) rotate(351) scale(0.47)"/>
+            <use href="#fl" transform="translate(71 898) rotate(98) scale(0.53)"/>
+            <use href="#fl" transform="translate(60 189) rotate(212) scale(0.39)"/>
+            <use href="#fl" transform="translate(54 618) rotate(24) scale(0.41)"/>
+            <use href="#fl" transform="translate(15 567) rotate(111) scale(0.52)"/>
+            <use href="#fl" transform="translate(75 750) rotate(191) scale(0.51)"/>
+            <use href="#fl" transform="translate(35 225) rotate(97) scale(0.60)"/>
+            <circle class="spark" cx="57" cy="592" r="1.9" style="--d:4.7s"/>
+            <circle class="spark" cx="58" cy="1155" r="1.2" style="--d:4.7s"/>
+            <circle class="spark" cx="94" cy="1081" r="1.4" style="--d:4.1s"/>
+            <circle class="spark" cx="143" cy="800" r="1.3" style="--d:5.5s"/>
+            <circle class="spark" cx="146" cy="133" r="2.2" style="--d:0.5s"/>
+            <circle class="spark" cx="31" cy="954" r="2.1" style="--d:5.7s"/>
+            <circle class="spark" cx="102" cy="614" r="1.5" style="--d:3.4s"/>
+            <circle class="spark" cx="149" cy="776" r="2.3" style="--d:1.2s"/>
+            <circle class="spark" cx="116" cy="878" r="1.3" style="--d:4.9s"/>
+        </svg>
         <span class="grain"></span>
     </div>
-
-    <!-- shared paint for the priority star -->
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-        <defs>
-            <linearGradient id="irid" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#ff9bd8"/>
-                <stop offset=".25" stop-color="#ffc27a"/>
-                <stop offset=".5" stop-color="#f7f58f"/>
-                <stop offset=".7" stop-color="#86ffbf"/>
-                <stop offset=".85" stop-color="#7fdcff"/>
-                <stop offset="1" stop-color="#a893ff"/>
-            </linearGradient>
-        </defs>
-    </svg>
 
     <main class="shell">
         <header class="masthead">
