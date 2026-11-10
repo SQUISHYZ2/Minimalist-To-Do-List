@@ -21,7 +21,7 @@
     <meta name="apple-mobile-web-app-title" content="Tasks">
 </head>
 <body>
-    <!-- shared paint: the priority star's iridescence, the blossom + leaf the borders are built from, and the bloom + moon behind the list -->
+    <!-- shared paint: the iridescence of a priority, the blossom + leaf the borders are built from, and the bloom + moon behind the list -->
     <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
         <defs>
             <linearGradient id="irid" x1="0" y1="0" x2="1" y2="1">
@@ -312,7 +312,8 @@
             </button>
         </form>
 
-        <ul id="todo-list" class="todo-list" aria-label="Your tasks"></ul>
+        <ul id="todo-list" class="todo-list" aria-label="Your tasks" aria-describedby="gestures"></ul>
+        <p class="sr-only" id="gestures">Double-tap a task to mark it as a priority. Press and hold a task, or right-click it, for more options.</p>
 
         <p class="empty" id="empty" hidden>Nothing here yet.<br>Add your first task above.</p>
 
@@ -325,6 +326,94 @@
         <span id="toast-msg"></span>
         <button type="button" id="toast-undo">Undo</button>
     </div>
+
+    <!-- press and hold a task: its menu, and the reminder editor the menu leads to -->
+    <dialog class="modal" id="menu" aria-labelledby="menu-title">
+        <div class="sheet glass" id="menu-sheet" tabindex="-1">
+            <div class="sheet-body">
+                <section id="view-menu">
+                    <h2 class="sheet-title" id="menu-title"></h2>
+                    <div class="menu-list">
+                        <button type="button" class="menu-item" data-act="priority">
+                            <span class="menu-icon" data-icon="star"></span>
+                            <span class="menu-text"><span class="menu-label">Mark as priority</span></span>
+                        </button>
+                        <button type="button" class="menu-item" data-act="remind">
+                            <span class="menu-icon" data-icon="bell"></span>
+                            <span class="menu-text"><span class="menu-label">Set a reminder</span><span class="menu-meta"></span></span>
+                        </button>
+                        <button type="button" class="menu-item" data-act="edit">
+                            <span class="menu-icon" data-icon="edit"></span>
+                            <span class="menu-text"><span class="menu-label">Edit</span></span>
+                        </button>
+                        <button type="button" class="menu-item" data-act="copy">
+                            <span class="menu-icon" data-icon="copy"></span>
+                            <span class="menu-text"><span class="menu-label">Copy text</span></span>
+                        </button>
+                        <div class="menu-rule" role="presentation"></div>
+                        <button type="button" class="menu-item danger" data-act="delete">
+                            <span class="menu-icon" data-icon="trash"></span>
+                            <span class="menu-text"><span class="menu-label">Delete</span></span>
+                        </button>
+                    </div>
+                </section>
+
+                <section id="view-remind" hidden>
+                    <div class="sheet-top">
+                        <p class="sheet-lead">Remind me about</p>
+                        <button type="button" class="sheet-x" id="remind-cancel" aria-label="Close" data-icon="close"></button>
+                    </div>
+                    <h2 class="sheet-title" id="remind-title"></h2>
+
+                    <div class="presets" role="group" aria-label="Quick times">
+                        <button type="button" class="pill" data-preset="15m">In 15 min</button>
+                        <button type="button" class="pill" data-preset="1h">In 1 hour</button>
+                        <button type="button" class="pill" data-preset="3h">In 3 hours</button>
+                        <button type="button" class="pill" data-preset="tomorrow" id="preset-tomorrow">Tomorrow</button>
+                    </div>
+
+                    <div class="when">
+                        <label class="field"><span class="field-cap">Date</span><input type="date" id="remind-date" aria-describedby="remind-hint"></label>
+                        <label class="field"><span class="field-cap">Time</span><input type="time" id="remind-time" aria-describedby="remind-hint"></label>
+                    </div>
+                    <p class="remind-hint" id="remind-hint"></p>
+
+                    <div class="tone">
+                        <button type="button" class="tone-play" id="tone-play" aria-label="Play the ringtone"></button>
+                        <div class="tone-text"><span class="field-cap">Ringtone</span><span class="tone-name" id="tone-name">Chime</span></div>
+                        <button type="button" class="pill" id="tone-reset" hidden>Default</button>
+                        <button type="button" class="pill" id="tone-pick">Choose…</button>
+                        <input type="file" id="tone-file" class="sr-only" accept="audio/*" tabindex="-1" aria-hidden="true">
+                    </div>
+                    <p class="tone-note" id="tone-note" role="alert" hidden></p>
+                    <p class="remind-note" id="remind-note"></p>
+
+                    <div class="sheet-actions">
+                        <button type="button" class="btn quiet danger" id="remind-clear" hidden>Remove reminder</button>
+                        <button type="button" class="btn solid" id="remind-save">Set reminder</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- a reminder that has come due -->
+    <dialog class="modal alarm" id="alarm" role="alertdialog" aria-labelledby="alarm-title" aria-describedby="alarm-task alarm-when">
+        <div class="sheet glass" id="alarm-sheet" tabindex="-1">
+            <div class="sheet-body">
+                <div class="alarm-bell" data-icon="bell"></div>
+                <p class="sheet-lead" id="alarm-title">Reminder</p>
+                <h2 class="alarm-task" id="alarm-task"></h2>
+                <p class="alarm-when" id="alarm-when"></p>
+                <div class="alarm-actions">
+                    <button type="button" class="btn solid" data-answer="done">Mark as done</button>
+                    <button type="button" class="btn soft" data-answer="snooze">Snooze 10 min</button>
+                    <button type="button" class="btn quiet" data-answer="dismiss">Dismiss</button>
+                </div>
+                <p class="alarm-more" id="alarm-more" hidden></p>
+            </div>
+        </div>
+    </dialog>
 
     <div class="sr-only" id="live" aria-live="polite" aria-atomic="true"></div>
 </body>

@@ -1,7 +1,7 @@
 // Offline support: pre-cache the app shell, then serve network-first
 // (so edits show up as soon as you're online) with the cache as the safety net.
 
-const CACHE_NAME = 'todo-app-v6';
+const CACHE_NAME = 'todo-app-v7';
 const APP_SHELL = [
     './',
     './index.html',
@@ -48,5 +48,16 @@ self.addEventListener('fetch', (event) => {
                 // An uncached page (e.g. a mistyped deep link) is sent to the app root, where relative assets resolve.
                 caches.match(request).then((hit) => hit || (request.mode === 'navigate' ? Response.redirect(self.registration.scope, 302) : Response.error()))
             )
+    );
+});
+
+// A reminder's notification was tapped: bring the app to the front (or open it), where the alarm is waiting.
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+            const app = windows.find((client) => client.url.startsWith(self.registration.scope) && 'focus' in client);
+            return app ? app.focus() : self.clients.openWindow(self.registration.scope);
+        })
     );
 });
