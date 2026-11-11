@@ -13,6 +13,7 @@
     const TICK_MS = 30 * 1000;            // the longest the reminder clock sleeps between looks
     const TONE_KEY = 'ringtone';
     const TONE_MAX = 10 * 1024 * 1024;    // the largest ringtone file kept on the device
+    const ANSWERS_KEY = 'answers';        // where the service worker leaves what was pressed on a notification while no window was open
     const SAFE_ID = /^[\w-]{1,64}$/;
     const CONTROLS = 'button, a, input, textarea, select, label';
     const reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
@@ -44,11 +45,10 @@
         viewRemind: $('#view-remind'),
         remindTitle: $('#remind-title'),
         remindCancel: $('#remind-cancel'),
-        presetTomorrow: $('#preset-tomorrow'),
         remindDate: $('#remind-date'),
         remindTime: $('#remind-time'),
+        remindTimeText: $('#remind-time-text'),
         remindHint: $('#remind-hint'),
-        remindNote: $('#remind-note'),
         remindClear: $('#remind-clear'),
         remindSave: $('#remind-save'),
         tonePlay: $('#tone-play'),
@@ -57,6 +57,16 @@
         tonePick: $('#tone-pick'),
         toneFile: $('#tone-file'),
         toneNote: $('#tone-note'),
+
+        viewClock: $('#view-clock'),
+        clockHour: $('#clock-hour'),
+        clockMinute: $('#clock-minute'),
+        clockHalf: $('#clock-half'),
+        clockCancel: $('#clock-cancel'),
+        clockDone: $('#clock-done'),
+        dial: $('#dial'),
+        dialHours: $('#dial-hours'),
+        dialMinutes: $('#dial-minutes'),
 
         alarm: $('#alarm'),
         alarmSheet: $('#alarm-sheet'),
@@ -74,6 +84,7 @@
         bell: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.4a5.3 5.3 0 0 0-5.3 5.3v3.4c0 .9-.3 1.7-.9 2.4l-.9 1.1h14.2l-.9-1.1a3.6 3.6 0 0 1-.9-2.4V9.7A5.3 5.3 0 0 0 12 4.4z"/><path d="M10 19.4a2.1 2.1 0 0 0 4 0M12 2.9v1.5"/></svg>',
         copy: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.6" y="8.6" width="10.9" height="10.9" rx="2.6"/><path d="M15.4 8.6V6.7a2.2 2.2 0 0 0-2.2-2.2H6.7a2.2 2.2 0 0 0-2.2 2.2v6.5a2.2 2.2 0 0 0 2.2 2.2h1.9"/></svg>',
         close: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6.6 6.6l10.8 10.8M17.4 6.6L6.6 17.4"/></svg>',
+        clock: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7.9"/><path d="M12 7.7V12l2.9 1.9"/></svg>',
         play: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8.4 5.5v13a.9.9 0 0 0 1.4.8l10-6.5a.9.9 0 0 0 0-1.6l-10-6.5a.9.9 0 0 0-1.4.8z"/></svg>',
         stop: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.4"/></svg>',
     };
@@ -137,12 +148,36 @@
      *  Rendering (keyed — rows are created once and re-used)
      * ------------------------------------------------------------------ */
 
+    /* The iridescence a priority wears is one small picture of the --irid colours, stretched and slowly turned (see
+       .film in the style sheet). Painted here from the tokens, so it follows the theme; a browser that cannot paint
+       it is left with the style sheet's own gradient, which looks the same and merely costs more to hold. */
+    function paintFilm() {
+        try {
+            const canvas = document.createElement('canvas');
+            const side = canvas.width = canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            if (!ctx || typeof ctx.createConicGradient !== 'function') return;
+            const tokens = getComputedStyle(root);
+            const stops = [1, 2, 3, 4, 5, 6, 1].map((n) => tokens.getPropertyValue('--irid-' + n).trim());
+            const sweep = ctx.createConicGradient(-Math.PI / 2, side / 2, side / 2);      // from twelve o'clock, as CSS has it
+            stops.forEach((colour, i) => sweep.addColorStop(i / (stops.length - 1), colour));
+            ctx.fillStyle = sweep;
+            ctx.fillRect(0, 0, side, side);
+            root.style.setProperty('--irid-film', `url("${canvas.toDataURL()}")`);
+        } catch (_) {
+            root.style.removeProperty('--irid-film');
+        }
+    }
+
     function buildItem(todo) {
         const li = document.createElement('li');
         li.className = 'todo glass';
         li.dataset.id = todo.id;
         // Static markup only — ids and text are assigned through the DOM, never parsed as HTML.
         li.innerHTML = `
+            <span class="lift" aria-hidden="true"></span>
+            <span class="halo" aria-hidden="true"><span class="halo-shape"><i class="film"></i></span></span>
+            <span class="ring" aria-hidden="true"><i class="film"></i></span>
             <button type="button" class="grip">${ICON.grip}</button>
             <input type="checkbox" class="cb">
             <label class="check">${ICON.check}</label>
@@ -642,7 +677,7 @@
     const dayYearFmt = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
     const pad = (n) => String(n).padStart(2, '0');
     const dateValue = (ts) => { const d = new Date(ts); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
-    const timeValue = (ts) => { const d = new Date(ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+    const clockLabel = (mins) => timeFmt.format(new Date(2000, 0, 1, Math.floor(mins / 60), mins % 60));   // minutes past midnight, as this device writes a time
     const roundUp = (ts, step) => Math.ceil(ts / step) * step;
     const midnight = (ts) => new Date(ts).setHours(0, 0, 0, 0);
 
@@ -663,13 +698,6 @@
         if (hours < 24) return rest ? `${hours} h ${rest} min` : `${hours} h`;
         const days = Math.floor(hours / 24), hrs = hours % 24;
         return `${days} ${days === 1 ? 'day' : 'days'}` + (hrs ? ` ${hrs} h` : '');
-    }
-
-    function tomorrowMorning() {
-        const d = new Date();
-        d.setDate(d.getDate() + 1);
-        d.setHours(9, 0, 0, 0);
-        return d.getTime();
     }
 
     /* ------------------------------------------------------------------ *
@@ -808,6 +836,7 @@
     function closeMenu() {
         if (sheet) clearInterval(sheet.timer);
         sheet = null;
+        clearTimeout(dial.timer);
         if (playing === 'preview') silence();
         closeModal(els.menu);
     }
@@ -816,10 +845,10 @@
     function paintSheet() {
         const todo = sheet && find(sheet.id);
         if (!todo) { closeMenu(); return; }
-        const remind = sheet.view === 'remind';
-        els.viewMenu.hidden = remind;
-        els.viewRemind.hidden = !remind;
-        els.menu.setAttribute('aria-labelledby', remind ? 'remind-title' : 'menu-title');
+        els.viewMenu.hidden = sheet.view !== 'menu';
+        els.viewRemind.hidden = sheet.view !== 'remind';
+        els.viewClock.hidden = sheet.view !== 'clock';
+        els.menu.setAttribute('aria-labelledby', sheet.view === 'menu' ? 'menu-title' : sheet.view === 'clock' ? 'clock-title' : 'remind-title');
         els.menuTitle.textContent = todo.text;
         els.remindTitle.textContent = todo.text;
         els.actPriority.classList.toggle('is-on', todo.priority);
@@ -861,52 +890,43 @@
         els.remindDate.min = dateValue(now);
         // start from the reminder it has, or an hour from now on a round five minutes
         setPicked(todo.remindAt > now ? todo.remindAt : roundUp(now + 60 * 60000, 5 * 60000));
-        els.presetTomorrow.textContent = `Tomorrow, ${timeFmt.format(tomorrowMorning())}`;
         paintSheet();
         paintHint();
         toneNote('');
         paintTone();
-        paintNote();
         loadTone().then(paintTone);
         clearInterval(sheet.timer);
         sheet.timer = setInterval(paintHint, 20000);    // "rings in…" keeps up with the clock
         focusSheet(els.viewRemind.querySelector('[data-preset]'));
     }
 
+    let pickedTime = 0;                   // the time of day the editor holds, in minutes past midnight (the date sits in its own field)
+
     function setPicked(ts) {
+        const d = new Date(ts);
         els.remindDate.value = dateValue(ts);
-        els.remindTime.value = timeValue(ts);
+        pickedTime = d.getHours() * 60 + d.getMinutes();
+        els.remindTimeText.textContent = clockLabel(pickedTime);
     }
 
-    /* the moment the two fields name, in this device's own time — NaN while either is unfilled */
+    /* the moment the date and the time name between them, in this device's own time — NaN while there is no date */
     function picked() {
         const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(els.remindDate.value);
-        const t = /^(\d{2}):(\d{2})/.exec(els.remindTime.value);
-        return d && t ? new Date(+d[1], d[2] - 1, +d[3], +t[1], +t[2], 0, 0).getTime() : NaN;
+        return d ? new Date(+d[1], d[2] - 1, +d[3], Math.floor(pickedTime / 60), pickedTime % 60, 0, 0).getTime() : NaN;
     }
 
     function presetTime(key) {
-        if (key === 'tomorrow') return tomorrowMorning();
         const mins = { '15m': 15, '1h': 60, '3h': 180 }[key] || 60;
-        return roundUp(Date.now() + mins * 60000, 60000);   // never sooner than asked
+        // to the nearest whole minute, so that "In 15 min" reads back as "Rings in 15 min." and never as 16
+        return Math.round((Date.now() + mins * 60000) / 60000) * 60000;
     }
 
     function paintHint() {
         const at = picked(), now = Date.now();
-        const problem = Number.isNaN(at) ? 'Choose a date and a time.' : at <= now ? 'That time has already passed.' : '';
+        const problem = Number.isNaN(at) ? 'Choose a date.' : at <= now ? 'That time has already passed.' : '';
         els.remindHint.textContent = problem || `Rings in ${untilLabel(at - now)}.`;
         els.remindHint.classList.toggle('bad', !!problem);
         return !problem;
-    }
-
-    function paintNote() {
-        const state = 'Notification' in window ? Notification.permission : 'none';
-        const missed = ' A reminder missed while Tasks was closed rings when you open it again.';
-        els.remindNote.textContent =
-            state === 'granted' ? 'Tasks has to be open to ring. In the background it also sends a notification.' + missed
-            : state === 'denied' ? 'Tasks has to be on screen to ring, because notifications are blocked for it.' + missed
-            : state === 'default' ? 'Tasks has to be open to ring. You’ll be asked to allow notifications, so it can reach you from the background.' + missed
-            : 'Tasks has to be open to ring.' + missed;
     }
 
     function saveReminder() {
@@ -939,6 +959,178 @@
         withFlip(render);
         checkReminders();
         showToast('Reminder removed', false);
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  The clock: the reminder's time, read off a dial — the hours first, then the minutes
+     * ------------------------------------------------------------------ */
+
+    const HALVES = !!timeFmt.resolvedOptions().hour12;  // a clock of two twelve-hour halves, as this device keeps time — or one of twenty-four
+    const REACH = 37.5, REACH_INNER = 22;               // how far from the middle the numerals sit, as a share of the dial's width (the style sheet agrees)
+    const dial = { mode: 'hour', mins: 0, turn: 0, pointer: null, x: 0, y: 0, moved: false, timer: 0 };
+
+    function buildDial() {
+        const place = (ring, label, value, step, reach) => {
+            const num = document.createElement('span');
+            const a = step * Math.PI / 6;
+            num.className = reach === REACH ? 'dial-num' : 'dial-num inner';
+            num.dataset.value = value;
+            num.textContent = label;
+            num.style.left = (50 + reach * Math.sin(a)).toFixed(2) + '%';
+            num.style.top = (50 - reach * Math.cos(a)).toFixed(2) + '%';
+            ring.append(num);
+        };
+        for (let i = 0; i < 12; i++) {
+            // twelve at the top; a twenty-four-hour dial keeps midnight and the afternoon on a ring inside
+            place(els.dialHours, String(i || 12), HALVES ? i : i || 12, i, REACH);
+            if (!HALVES) place(els.dialHours, i ? String(i + 12) : '00', i ? i + 12 : 0, i, REACH_INNER);
+            place(els.dialMinutes, pad(i * 5), i * 5, i, REACH);
+        }
+        els.clockHalf.hidden = !HALVES;
+        const halfFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', hour12: true });
+        els.clockHalf.querySelectorAll('button').forEach((btn) => {
+            const noon = btn.dataset.half === 'pm';
+            const part = halfFmt.formatToParts(new Date(2000, 0, 1, noon ? 15 : 9)).find((p) => p.type === 'dayPeriod');
+            btn.textContent = part ? part.value : noon ? 'PM' : 'AM';
+        });
+    }
+
+    function openClock() {
+        if (!sheet) return;
+        sheet.view = 'clock';
+        dial.mins = pickedTime;
+        dial.mode = 'hour';
+        dial.pointer = null;
+        paintSheet();
+        paintClock();
+        focusSheet(els.dial);
+    }
+
+    /* back to the editor, with the time the dial shows or the one it had */
+    function closeClock(keep) {
+        if (!sheet || sheet.view !== 'clock') return;
+        clearTimeout(dial.timer);
+        if (keep) {
+            pickedTime = dial.mins;
+            els.remindTimeText.textContent = clockLabel(pickedTime);
+        }
+        sheet.view = 'remind';
+        paintSheet();
+        paintHint();
+        focusSheet(els.remindTime);
+    }
+
+    function paintClock() {
+        const h = Math.floor(dial.mins / 60), m = dial.mins % 60;
+        const hours = dial.mode === 'hour';
+        els.clockHour.firstElementChild.textContent = HALVES ? String(h % 12 || 12) : pad(h);
+        els.clockMinute.firstElementChild.textContent = pad(m);
+        els.clockHour.setAttribute('aria-pressed', String(hours));
+        els.clockMinute.setAttribute('aria-pressed', String(!hours));
+        els.clockHour.setAttribute('aria-label', `Hour: ${els.clockHour.textContent}`);
+        els.clockMinute.setAttribute('aria-label', `Minute: ${pad(m)}`);
+        els.clockHalf.querySelectorAll('button').forEach((btn) => btn.setAttribute('aria-pressed', String((btn.dataset.half === 'pm') === (h >= 12))));
+
+        els.dialHours.classList.toggle('off', !hours);
+        els.dialMinutes.classList.toggle('off', hours);
+        const on = hours ? (HALVES ? h % 12 : h) : m;
+        for (const num of (hours ? els.dialHours : els.dialMinutes).children) {
+            const value = +num.dataset.value;
+            num.classList.toggle('is-on', value === on);
+            // a minute numeral the knob has come to rest across, without being on it, steps aside
+            num.classList.toggle('under', !hours && value !== on && Math.abs((value - m + 90) % 60 - 30) < 3);
+        }
+        els.dial.classList.toggle('inner', hours && !HALVES && (h === 0 || h > 12));
+        els.dial.classList.toggle('between', !hours && m % 5 !== 0);    // no numeral under the knob: it carries a pip instead
+
+        // the hand goes the short way round to where it is wanted
+        const to = hours ? (h % 12) * 30 : m * 6;
+        dial.turn += ((to - dial.turn) % 360 + 540) % 360 - 180;
+        els.dial.style.setProperty('--turn', dial.turn + 'deg');
+
+        els.dial.setAttribute('aria-label', hours ? 'Hour' : 'Minute');
+        els.dial.setAttribute('aria-valuemin', '0');
+        els.dial.setAttribute('aria-valuemax', hours ? '23' : '59');
+        els.dial.setAttribute('aria-valuenow', String(hours ? h : m));
+        els.dial.setAttribute('aria-valuetext', clockLabel(dial.mins));
+    }
+
+    function setDial(mins) {
+        if (mins === dial.mins) return;
+        dial.mins = mins;
+        paintClock();
+        if (navigator.vibrate) navigator.vibrate(3);
+    }
+
+    function setDialMode(mode) {
+        clearTimeout(dial.timer);
+        if (dial.mode === mode) return;
+        dial.mode = mode;
+        paintClock();
+    }
+
+    /* point the hand at a press. `settle` rounds the minutes to the nearest five: a tap is not as sure as a drag. */
+    function aim(e, settle) {
+        const box = els.dial.getBoundingClientRect();
+        const x = e.clientX - box.left - box.width / 2, y = e.clientY - box.top - box.height / 2;
+        const deg = (Math.atan2(x, -y) * 180 / Math.PI + 360) % 360;      // clockwise from twelve
+        let h = Math.floor(dial.mins / 60), m = dial.mins % 60;
+        if (dial.mode === 'hour') {
+            const at = Math.round(deg / 30) % 12;
+            if (HALVES) h = (h >= 12 ? 12 : 0) + at;
+            else h = Math.hypot(x, y) < box.width * (REACH + REACH_INNER) / 200 ? (at ? at + 12 : 0) : at || 12;
+        } else {
+            m = settle ? Math.round(deg / 30) % 12 * 5 : Math.round(deg / 6) % 60;
+        }
+        setDial(h * 60 + m);
+    }
+
+    function onDialDown(e) {
+        if (dial.pointer !== null || (e.pointerType === 'mouse' && e.button !== 0)) return;
+        clearTimeout(dial.timer);
+        dial.pointer = e.pointerId;
+        dial.x = e.clientX;
+        dial.y = e.clientY;
+        dial.moved = false;
+        try { els.dial.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+        aim(e, true);
+    }
+
+    function onDialMove(e) {
+        if (e.pointerId !== dial.pointer) return;
+        if (!dial.moved && Math.hypot(e.clientX - dial.x, e.clientY - dial.y) > 6) {
+            dial.moved = true;
+            els.dial.classList.add('turning');          // from here the hand keeps to the finger, with no glide of its own
+        }
+        if (dial.moved) aim(e, false);
+    }
+
+    function onDialUp(e) {
+        if (e.pointerId !== dial.pointer) return;
+        dial.pointer = null;
+        els.dial.classList.remove('turning');
+        if (e.type !== 'pointerup') return;
+        if (dial.moved) aim(e, false);
+        // the hour is chosen: on to the minutes, once the hand has been seen to land
+        if (dial.mode === 'hour') dial.timer = setTimeout(() => setDialMode('minute'), 280);
+    }
+
+    function onDialKey(e) {
+        const hours = dial.mode === 'hour';
+        const step = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1, PageUp: hours ? 3 : 5, PageDown: hours ? -3 : -5 }[e.key];
+        let h = Math.floor(dial.mins / 60), m = dial.mins % 60;
+        if (step && hours) h = (h + step + 24) % 24;
+        else if (step) m = (m + step + 60) % 60;
+        else if (e.key === 'Home') { if (hours) h = 0; else m = 0; }
+        else if (e.key === 'End') { if (hours) h = 23; else m = 59; }
+        else return;
+        e.preventDefault();
+        setDial(h * 60 + m);
+    }
+
+    function setHalf(half) {
+        const h = Math.floor(dial.mins / 60);
+        if ((half === 'pm') !== (h >= 12)) setDial((dial.mins + 720) % 1440);
     }
 
     /* ------------------------------------------------------------------ *
@@ -995,14 +1187,15 @@
      *  The alarm
      * ------------------------------------------------------------------ */
 
-    function raise(rung) {
+    /* `quiet`: put the alarm on show without ringing or notifying — it was asked for, so it already has attention */
+    function raise(rung, quiet = false) {
         cancelHold();
         if (editing) editing.finish(true, false);       // the alarm should name the task as it now reads
         for (const r of rung) {
             const waiting = alerts.find((a) => a.id === r.id);
             if (waiting) waiting.at = r.at;
             else alerts.push(r);
-            notify(r);
+            if (!quiet) notify(r);
         }
         paintAlarm();
         if (!isOpen(els.alarm)) {
@@ -1010,7 +1203,15 @@
             openModal(els.alarm);
             els.alarmSheet.focus({ preventScroll: true });   // not a button: a key already on its way down must not answer it
         }
-        ring();
+        if (!quiet) ring();
+    }
+
+    /* A reminder's notification was tapped: its alarm goes on show, even in a window that never rang it. */
+    function recall(id, at) {
+        const todo = find(id);
+        noted.delete(id);                               // the tap took the notification away
+        if (!todo || todo.completed || alerts.some((a) => a.id === id)) return;
+        raise([{ id, at: typeof at === 'number' && at > 0 ? at : Date.now() }], true);
     }
 
     function paintAlarm() {
@@ -1024,16 +1225,21 @@
         document.title = `🔔 ${todo.text}`;
     }
 
-    /* done · snooze · dismiss, for the reminder on show */
-    function answer(how) {
-        const first = alerts.shift();
-        stopRing();
-        if (first) {
-            unnotify(first.id);
-            const todo = find(first.id);
-            if (todo && how === 'done' && !todo.completed) toggleDone(todo.id, true);
-            else if (todo && how === 'snooze') {
-                todo.remindAt = Date.now() + SNOOZE_MS;
+    /* done · snooze · dismiss — for the reminder on show or, from the buttons on a notification, for the one it names.
+       `when` is the moment the answer was given, which for a notification may be well before it gets here. */
+    function answer(how, id = alerts.length ? alerts[0].id : '', when = Date.now()) {
+        const shown = alerts.findIndex((a) => a.id === id);
+        const todo = find(id);
+        if (shown >= 0) {
+            alerts.splice(shown, 1);
+            stopRing();
+        }
+        if (id) unnotify(id);
+        if (todo && !todo.completed) {
+            if (how === 'done') toggleDone(id, true);
+            // a snooze from a notification that has outlived its alarm leaves alone a reminder set since
+            else if (how === 'snooze' && (shown >= 0 || !todo.remindAt)) {
+                todo.remindAt = when + SNOOZE_MS;
                 save();
                 withFlip(render);
                 announce(`Snoozed. ${todo.text} rings again at ${timeFmt.format(todo.remindAt)}`);
@@ -1304,14 +1510,25 @@
     }
 
     /* ------------------------------------------------------------------ *
-     *  System notifications — how a reminder reaches someone who is not looking at the app
+     *  System notifications — the reminder as the phone's own apps would post it: a banner at the
+     *  moment it is due, then a place in the notification tray and on the lock screen until it is
+     *  answered. It buzzes, and it carries its own buttons, so it can be answered without opening Tasks.
      * ------------------------------------------------------------------ */
 
     const pageNotes = new Map();          // notifications shown without the service worker: todo id -> Notification
+    const noted = new Set();              // todo ids whose reminder has a notification out
+    const ANSWERS = ['done', 'snooze', 'dismiss'];
 
     const swRegistration = () => ('serviceWorker' in navigator
         ? navigator.serviceWorker.getRegistration().catch(() => undefined)
         : Promise.resolve(undefined));
+
+    const mayNotify = () => 'Notification' in window && Notification.permission === 'granted';
+
+    /* Installed on Android, Tasks posts under its own name and icon, like any app there. The picture a web page adds
+       to its notifications would be that same icon a second time, at the side - the mark of a web page. */
+    const ownsItsNotifications = () => /Android/i.test(navigator.userAgent)
+        && !!window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
 
     function askToNotify() {
         if (!('Notification' in window) || Notification.permission !== 'default') return;
@@ -1321,12 +1538,35 @@
         } catch (_) { /* this browser will simply not notify */ }
     }
 
+    /* what a reminder's notification says, and what it offers */
+    function noteFor(todo, at) {
+        return {
+            title: todo.text.length > 110 ? todo.text.slice(0, 107) + '…' : todo.text,
+            basics: {
+                body: `Reminder for ${timeFmt.format(at)}`,
+                tag: 'reminder-' + todo.id,
+                ...(ownsItsNotifications() ? {} : { icon: 'icons/manifest-icon-192.maskable.png' }),
+                badge: 'icons/badge-96.png',            // the small bell in the status bar
+                timestamp: at,
+                data: { id: todo.id, at },              // what the service worker needs, to pass an answer back
+            },
+            // only a notification shown through the service worker may have these
+            extras: {
+                renotify: true,
+                requireInteraction: true,
+                vibrate: [500, 200, 500, 200, 500, 200, 500],
+                actions: [{ action: 'done', title: 'Mark as done' }, { action: 'snooze', title: 'Snooze 10 min' }],
+            },
+        };
+    }
+
+    /* Posted whether or not Tasks is in front — as a built-in app's would be. The alarm inside the app rings as well;
+       answering either one puts the other away (see answer, and the service worker). */
     function notify(alert) {
         const todo = find(alert.id);
-        if (!todo || !('Notification' in window) || Notification.permission !== 'granted') return;
-        if (document.visibilityState === 'visible' && document.hasFocus()) return;      // the alarm is in plain sight
-        const title = todo.text.length > 110 ? todo.text.slice(0, 107) + '…' : todo.text;
-        const basics = { body: `Reminder for ${whenLabel(alert.at, true)}`, tag: 'reminder-' + todo.id, icon: 'icons/manifest-icon-192.maskable.png' };
+        if (!todo || !mayNotify()) return;
+        const { title, basics, extras } = noteFor(todo, alert.at);
+        noted.add(todo.id);
         const fromPage = () => {
             try {
                 const note = new Notification(title, basics);
@@ -1336,17 +1576,57 @@
         };
         swRegistration().then((reg) => {
             if (!reg || !reg.active || !reg.showNotification) { fromPage(); return; }
-            reg.showNotification(title, { ...basics, renotify: true, requireInteraction: true, vibrate: [400, 180, 400] }).catch(fromPage);
+            reg.showNotification(title, { ...basics, ...extras }).catch(fromPage);
         });
     }
 
     function unnotify(id) {
+        noted.delete(id);
         const note = pageNotes.get(id);
         if (note) { note.close(); pageNotes.delete(id); }
         swRegistration()
             .then((reg) => (reg && reg.getNotifications ? reg.getNotifications({ tag: 'reminder-' + id }) : []))
             .then((notes) => notes.forEach((n) => n.close()))
             .catch(() => {});
+    }
+
+    const isAnswer = (msg) => !!msg && msg.type === 'answer' && typeof msg.id === 'string' && SAFE_ID.test(msg.id);
+
+    /* The service worker says a notification was answered. Every open window hears this, and each puts that alarm
+       away — but the list is changed once only, by whichever window takes the answer off the shelf (see shelved). */
+    function onWorkerMessage(msg) {
+        if (!isAnswer(msg)) return;
+        if (msg.how === 'open') { recall(msg.id, msg.at); return; }
+        const shown = alerts.findIndex((a) => a.id === msg.id);
+        if (shown >= 0) {
+            alerts.splice(shown, 1);
+            noted.delete(msg.id);
+            stopRing();
+            settleAlarm();
+        }
+        shelved();
+    }
+
+    /* carry out an answer taken off the shelf */
+    function heed(msg) {
+        if (!isAnswer(msg)) return;
+        const when = typeof msg.when === 'number' && msg.when > 0 && msg.when < Date.now() ? msg.when : Date.now();
+        if (msg.how === 'open') recall(msg.id, msg.at);
+        else if (ANSWERS.includes(msg.how)) answer(msg.how, msg.id, when);
+    }
+
+    /* What was pressed on a notification waits in IndexedDB, where the service worker shelves it — it cannot reach
+       the list itself. Taking it off the shelf is one transaction, so with several windows open only one of them
+       acts on it. Only the last word on each reminder counts. Never rejects, and never keeps the caller waiting long. */
+    function shelved() {
+        const taken = kv('readwrite', (store) => { const req = store.get(ANSWERS_KEY); store.delete(ANSWERS_KEY); return req; })
+            .then((list) => {
+                const last = new Map();
+                (Array.isArray(list) ? list : []).forEach((msg) => { if (msg) last.set(msg.id, msg); });
+                last.forEach(heed);
+            })
+            .catch(() => { /* no IndexedDB: nothing was shelved */ });
+        return Promise.race([taken, new Promise((resolve) => { setTimeout(resolve, 1000); })]);
     }
 
     /* ------------------------------------------------------------------ *
@@ -1445,7 +1725,8 @@
 
     els.menu.addEventListener('click', (e) => {
         if (e.target === els.menu) {                            // outside the sheet
-            if (scrimDown) closeMenu();
+            if (scrimDown && sheet && sheet.view === 'clock') closeClock(false);     // the clock steps back to the editor it came from
+            else if (scrimDown) closeMenu();
             scrimDown = false;
             return;
         }
@@ -1466,6 +1747,12 @@
         else if (btn === els.remindSave) saveReminder();
         else if (btn === els.remindClear) clearReminder();
         else if (btn === els.remindCancel) closeMenu();
+        else if (btn === els.remindTime) openClock();
+        else if (btn === els.clockHour) setDialMode('hour');
+        else if (btn === els.clockMinute) setDialMode('minute');
+        else if (btn.dataset.half) setHalf(btn.dataset.half);
+        else if (btn === els.clockDone) closeClock(true);
+        else if (btn === els.clockCancel) closeClock(false);
         else if (btn === els.tonePlay) { if (playing === 'preview') silence(); else { toneNote(''); play('preview'); } }
         else if (btn === els.tonePick) els.toneFile.click();
         else if (btn === els.toneReset) resetTone();
@@ -1479,17 +1766,31 @@
             const step = e.key === 'ArrowDown' ? 1 : -1;
             e.preventDefault();
             items[at < 0 ? (step > 0 ? 0 : items.length - 1) : (at + step + items.length) % items.length].focus();
-        } else if (sheet.view === 'remind' && e.key === 'Enter' && (e.target === els.remindDate || e.target === els.remindTime)) {
+        } else if (sheet.view === 'remind' && e.key === 'Enter' && e.target === els.remindDate) {
             e.preventDefault();
             saveReminder();
+        } else if (sheet.view === 'clock' && e.key === 'Enter' && !e.target.closest('button')) {
+            e.preventDefault();                                 // Enter walks the clock: hour, minute, done
+            if (dial.mode === 'hour') setDialMode('minute');
+            else closeClock(true);
         }
     });
 
-    // Escape, the back button… however the dialog was closed, the state behind it follows
+    // Escape or the back button, with the clock up, goes back one step rather than all the way out
+    els.menu.addEventListener('cancel', (e) => {
+        if (sheet && sheet.view === 'clock') { e.preventDefault(); closeClock(false); }
+    });
+
+    // …and however the dialog was closed, the state behind it follows
     els.menu.addEventListener('close', () => { if (!isOpen(els.menu)) closeMenu(); });
 
     els.remindDate.addEventListener('input', paintHint);
-    els.remindTime.addEventListener('input', paintHint);
+
+    els.dial.addEventListener('pointerdown', onDialDown);
+    els.dial.addEventListener('pointermove', onDialMove);
+    els.dial.addEventListener('pointerup', onDialUp);
+    els.dial.addEventListener('pointercancel', onDialUp);
+    els.dial.addEventListener('keydown', onDialKey);
     els.remindHint.addEventListener('animationend', () => els.remindHint.classList.remove('nudge'));
 
     els.toneFile.addEventListener('change', () => {
@@ -1576,7 +1877,14 @@
     function paintDate() {
         els.today.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
     }
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) { paintDate(); checkReminders(); } });
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            alerts.forEach((a) => { if (!noted.has(a.id)) notify(a); });      // an alarm left unanswered follows you out of the app
+            return;
+        }
+        paintDate();
+        shelved().then(checkReminders);
+    });
     // timers sleep when the device does — look at the clock again whenever the app is back in front
     window.addEventListener('focus', () => checkReminders());
     window.addEventListener('pageshow', () => checkReminders());
@@ -1586,13 +1894,22 @@
      * ------------------------------------------------------------------ */
 
     document.querySelectorAll('[data-icon]').forEach((el) => { el.innerHTML = ICON[el.dataset.icon] || ''; });
+    paintFilm();
+    if (window.matchMedia) {
+        const scheme = window.matchMedia('(prefers-color-scheme: dark)');
+        if (scheme.addEventListener) scheme.addEventListener('change', paintFilm);       // day and night wear different colours
+        else if (scheme.addListener) scheme.addListener(paintFilm);
+    }
+    buildDial();
     paintDate();
     render();
     save();                                // persist the id/priority upgrade of legacy data
-    checkReminders();                      // ring anything that came due while the app was closed, and start the clock
+    // what was answered on a notification comes first; then ring anything that came due while the app was closed, and start the clock
+    shelved().then(checkReminders);
     if (todos.some((t) => t.remindAt)) loadTone();
 
     if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (e) => onWorkerMessage(e.data));
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js').catch((err) => console.warn('Service worker registration failed:', err));
         });

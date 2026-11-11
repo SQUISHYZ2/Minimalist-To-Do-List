@@ -6,8 +6,8 @@
    second set of the same tokens, so the two modes share every component.
    ========================================================================== */
 
-@property --spin  { syntax: '<angle>';  inherits: false; initial-value: 0deg; }
 @property --light { syntax: '<number>'; inherits: false; initial-value: 0; }
+@property --turn  { syntax: '<angle>';  inherits: true;  initial-value: 0deg; }
 
 :root {
     color-scheme: dark;
@@ -223,7 +223,14 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* ---------- backdrop: slow colour fields for the glass to refract ---------- */
+/* ---------- backdrop: colour fields for the glass to refract ----------
+
+   The backdrop is a still picture, and the browser holds it as ONE layer. It used to drift and twinkle, and
+   every piece that moved had to be kept as a full-screen layer of its own: three orbs, two fields of stars,
+   and - because they lay on top of those - the band, the moon, the vines and the grain as well. That came to
+   more picture than a phone's graphics memory will hold, and whatever did not fit was dropped, leaving patches
+   of the bare background colour (worst while a task was being dragged, when still more was asked for).
+   So: nothing in here animates except the fireflies, which are a few pixels each. Keep it that way. */
 
 .backdrop {
     position: fixed;
@@ -239,15 +246,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     width: 78vmax;
     height: 78vmax;
     border-radius: 50%;
-    will-change: transform;
 }
-.orb-a { top: -34vmax; left: -26vmax; background: radial-gradient(closest-side, var(--orb-a), transparent); animation: drift-a 38s ease-in-out infinite alternate; }
-.orb-b { top: 16vmax;  right: -38vmax; background: radial-gradient(closest-side, var(--orb-b), transparent); animation: drift-b 46s ease-in-out infinite alternate; }
-.orb-c { bottom: -42vmax; left: -6vmax; background: radial-gradient(closest-side, var(--orb-c), transparent); animation: drift-c 52s ease-in-out infinite alternate; }
-
-@keyframes drift-a { to { transform: translate3d(16vmax, 12vmax, 0) scale(1.12); } }
-@keyframes drift-b { to { transform: translate3d(-18vmax, -8vmax, 0) scale(.92); } }
-@keyframes drift-c { to { transform: translate3d(14vmax, -14vmax, 0) scale(1.1); } }
+.orb-a { top: -34vmax; left: -26vmax; background: radial-gradient(closest-side, var(--orb-a), transparent); }
+.orb-b { top: 16vmax;  right: -38vmax; background: radial-gradient(closest-side, var(--orb-b), transparent); }
+.orb-c { bottom: -42vmax; left: -6vmax; background: radial-gradient(closest-side, var(--orb-c), transparent); }
 
 /* night sky: a faint band of the milky way and two depths of stars */
 .band {
@@ -266,18 +268,16 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     inset: 0;
     display: var(--sky);
     background-repeat: repeat;
+    opacity: .8;                        /* where they used to rest between dim and bright */
 }
 .stars-a {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='720' height='720'%3E%3Ccircle cx='171' cy='392' r='0.8' fill='%23ffd98a' opacity='0.78'/%3E%3Ccircle cx='418' cy='436' r='1.2' fill='%23ffe9bd' opacity='0.71'/%3E%3Ccircle cx='169' cy='717' r='0.9' fill='%23dfe8ff' opacity='0.91'/%3E%3Ccircle cx='286' cy='620' r='0.7' fill='%23ffe9bd' opacity='0.53'/%3E%3Ccircle cx='281' cy='11' r='1.1' fill='%23ffe9bd' opacity='0.54'/%3E%3Ccircle cx='31' cy='562' r='1.2' fill='%23ffe9bd' opacity='0.60'/%3E%3Ccircle cx='518' cy='633' r='1.1' fill='%23dfe8ff' opacity='0.96'/%3E%3Ccircle cx='524' cy='415' r='1.3' fill='%23e6eeff' opacity='0.52'/%3E%3Ccircle cx='70' cy='98' r='0.7' fill='%23dfe8ff' opacity='0.98'/%3E%3Ccircle cx='561' cy='616' r='0.8' fill='%23ffe9bd' opacity='0.91'/%3E%3Ccircle cx='253' cy='421' r='1.0' fill='%23ffd98a' opacity='0.95'/%3E%3Ccircle cx='659' cy='21' r='0.7' fill='%23ffd98a' opacity='0.78'/%3E%3Ccircle cx='117' cy='620' r='1.3' fill='%23ffe9bd' opacity='0.95'/%3E%3Ccircle cx='75' cy='472' r='1.0' fill='%23e6eeff' opacity='0.99'/%3E%3Ccircle cx='205' cy='46' r='1.2' fill='%23ffffff' opacity='0.99'/%3E%3Ccircle cx='248' cy='48' r='1.2' fill='%23dfe8ff' opacity='0.46'/%3E%3Ccircle cx='554' cy='628' r='0.5' fill='%23ffffff' opacity='0.79'/%3E%3Ccircle cx='272' cy='422' r='0.9' fill='%23e6eeff' opacity='0.96'/%3E%3Ccircle cx='364' cy='719' r='0.7' fill='%23ffe9bd' opacity='0.49'/%3E%3Ccircle cx='386' cy='683' r='1.3' fill='%23e6eeff' opacity='0.61'/%3E%3Ccircle cx='112' cy='31' r='1.2' fill='%23ffffff' opacity='0.62'/%3E%3Ccircle cx='646' cy='272' r='0.9' fill='%23ffd98a' opacity='0.74'/%3E%3Ccircle cx='624' cy='490' r='0.6' fill='%23ffe9bd' opacity='0.99'/%3E%3Ccircle cx='195' cy='457' r='1.1' fill='%23dfe8ff' opacity='0.97'/%3E%3Ccircle cx='704' cy='375' r='0.9' fill='%23dfe8ff' opacity='0.46'/%3E%3Ccircle cx='711' cy='227' r='0.8' fill='%23ffffff' opacity='0.77'/%3E%3Ccircle cx='43' cy='452' r='0.9' fill='%23e6eeff' opacity='0.82'/%3E%3Ccircle cx='438' cy='201' r='0.9' fill='%23ffd98a' opacity='0.77'/%3E%3Ccircle cx='15' cy='266' r='1.0' fill='%23ffe9bd' opacity='0.61'/%3E%3Ccircle cx='230' cy='262' r='0.8' fill='%23ffe9bd' opacity='0.65'/%3E%3Ccircle cx='190' cy='567' r='0.6' fill='%23ffe9bd' opacity='0.90'/%3E%3Ccircle cx='492' cy='95' r='0.9' fill='%23e6eeff' opacity='0.81'/%3E%3Ccircle cx='172' cy='135' r='0.8' fill='%23ffffff' opacity='0.83'/%3E%3Ccircle cx='433' cy='683' r='1.0' fill='%23ffffff' opacity='0.57'/%3E%3Ccircle cx='58' cy='534' r='0.7' fill='%23e6eeff' opacity='0.76'/%3E%3Ccircle cx='162' cy='87' r='0.9' fill='%23ffe9bd' opacity='0.55'/%3E%3Ccircle cx='132' cy='201' r='1.1' fill='%23ffe9bd' opacity='0.80'/%3E%3Ccircle cx='249' cy='93' r='0.7' fill='%23e6eeff' opacity='0.89'/%3E%3Ccircle cx='335' cy='457' r='0.7' fill='%23ffffff' opacity='0.76'/%3E%3Ccircle cx='663' cy='112' r='0.5' fill='%23ffe9bd' opacity='0.97'/%3E%3Ccircle cx='711' cy='313' r='1.3' fill='%23ffffff' opacity='0.96'/%3E%3Ccircle cx='23' cy='329' r='1.1' fill='%23e6eeff' opacity='0.86'/%3E%3Ccircle cx='392' cy='641' r='1.2' fill='%23e6eeff' opacity='0.92'/%3E%3Ccircle cx='86' cy='176' r='0.5' fill='%23ffe9bd' opacity='0.89'/%3E%3Ccircle cx='665' cy='646' r='1.2' fill='%23ffffff' opacity='0.77'/%3E%3Ccircle cx='346' cy='87' r='0.9' fill='%23ffffff' opacity='0.58'/%3E%3Ccircle cx='378' cy='298' r='1.3' fill='%23e6eeff' opacity='0.79'/%3E%3Ccircle cx='90' cy='700' r='0.9' fill='%23ffffff' opacity='0.90'/%3E%3Ccircle cx='253' cy='142' r='0.9' fill='%23ffffff' opacity='0.90'/%3E%3Ccircle cx='172' cy='197' r='1.2' fill='%23ffffff' opacity='0.52'/%3E%3Ccircle cx='351' cy='411' r='0.8' fill='%23ffffff' opacity='0.87'/%3E%3Ccircle cx='193' cy='380' r='0.8' fill='%23ffffff' opacity='0.71'/%3E%3Ccircle cx='617' cy='558' r='0.5' fill='%23dfe8ff' opacity='0.48'/%3E%3Ccircle cx='702' cy='615' r='0.6' fill='%23e6eeff' opacity='0.73'/%3E%3Ccircle cx='113' cy='52' r='0.8' fill='%23e6eeff' opacity='0.66'/%3E%3Ccircle cx='260' cy='138' r='0.8' fill='%23ffe9bd' opacity='0.52'/%3E%3Ccircle cx='3' cy='521' r='1.1' fill='%23ffffff' opacity='0.76'/%3E%3Ccircle cx='269' cy='435' r='1.1' fill='%23ffffff' opacity='0.66'/%3E%3Ccircle cx='449' cy='311' r='0.8' fill='%23ffd98a' opacity='0.72'/%3E%3Ccircle cx='227' cy='684' r='0.8' fill='%23ffffff' opacity='0.46'/%3E%3Ccircle cx='386' cy='501' r='0.6' fill='%23dfe8ff' opacity='0.68'/%3E%3Ccircle cx='94' cy='20' r='0.8' fill='%23ffe9bd' opacity='0.98'/%3E%3Ccircle cx='569' cy='189' r='0.9' fill='%23ffd98a' opacity='0.52'/%3E%3Ccircle cx='477' cy='639' r='1.1' fill='%23ffd98a' opacity='0.82'/%3E%3Ccircle cx='229' cy='383' r='1.1' fill='%23dfe8ff' opacity='0.84'/%3E%3Ccircle cx='103' cy='557' r='0.5' fill='%23ffffff' opacity='0.50'/%3E%3Ccircle cx='475' cy='271' r='1.2' fill='%23ffffff' opacity='0.64'/%3E%3Ccircle cx='18' cy='83' r='0.9' fill='%23e6eeff' opacity='0.83'/%3E%3Ccircle cx='417' cy='575' r='0.5' fill='%23ffe9bd' opacity='0.87'/%3E%3Ccircle cx='381' cy='172' r='0.9' fill='%23ffe9bd' opacity='0.50'/%3E%3Ccircle cx='44' cy='233' r='1.0' fill='%23ffffff' opacity='0.91'/%3E%3Ccircle cx='719' cy='465' r='0.9' fill='%23dfe8ff' opacity='0.84'/%3E%3Ccircle cx='182' cy='432' r='1.3' fill='%23ffffff' opacity='0.76'/%3E%3Ccircle cx='270' cy='169' r='1.2' fill='%23ffffff' opacity='0.91'/%3E%3Ccircle cx='299' cy='409' r='1.0' fill='%23ffd98a' opacity='0.96'/%3E%3Ccircle cx='348' cy='463' r='1.2' fill='%23ffffff' opacity='0.53'/%3E%3Ccircle cx='359' cy='348' r='1.1' fill='%23ffe9bd' opacity='0.97'/%3E%3Ccircle cx='518' cy='134' r='0.7' fill='%23ffe9bd' opacity='0.56'/%3E%3Ccircle cx='371' cy='673' r='1.2' fill='%23e6eeff' opacity='0.75'/%3E%3Ccircle cx='483' cy='616' r='1.0' fill='%23e6eeff' opacity='0.77'/%3E%3Ccircle cx='640' cy='221' r='0.7' fill='%23ffffff' opacity='0.89'/%3E%3Ccircle cx='124' cy='260' r='0.8' fill='%23ffffff' opacity='0.88'/%3E%3Ccircle cx='301' cy='502' r='1.1' fill='%23ffe9bd' opacity='0.56'/%3E%3Ccircle cx='601' cy='592' r='0.9' fill='%23ffd98a' opacity='0.71'/%3E%3Ccircle cx='52' cy='682' r='1.1' fill='%23ffffff' opacity='0.94'/%3E%3Ccircle cx='337' cy='165' r='0.7' fill='%23ffd98a' opacity='0.84'/%3E%3Ccircle cx='50' cy='157' r='0.7' fill='%23e6eeff' opacity='0.94'/%3E%3Ccircle cx='99' cy='448' r='1.0' fill='%23e6eeff' opacity='0.47'/%3E%3Ccircle cx='122' cy='32' r='0.6' fill='%23ffffff' opacity='0.50'/%3E%3Ccircle cx='85' cy='190' r='1.2' fill='%23dfe8ff' opacity='0.47'/%3E%3Ccircle cx='418' cy='486' r='0.5' fill='%23dfe8ff' opacity='0.63'/%3E%3Ccircle cx='273' cy='56' r='1.0' fill='%23dfe8ff' opacity='0.86'/%3E%3Ccircle cx='281' cy='392' r='0.6' fill='%23ffd98a' opacity='0.60'/%3E%3Ccircle cx='311' cy='316' r='0.9' fill='%23ffe9bd' opacity='0.59'/%3E%3Ccircle cx='678' cy='269' r='1.1' fill='%23e6eeff' opacity='0.87'/%3E%3C/svg%3E");
     background-size: 720px 720px;
-    animation: twinkle 7s ease-in-out infinite alternate;
 }
 .stars-b {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1100' height='1100'%3E%3Ccircle cx='356' cy='166' r='2.0' fill='%23ffe9bd' opacity='0.49'/%3E%3Ccircle cx='104' cy='641' r='2.2' fill='%23ffffff' opacity='0.57'/%3E%3Ccircle cx='477' cy='77' r='1.4' fill='%23ffe9bd' opacity='0.68'/%3E%3Ccircle cx='136' cy='246' r='1.9' fill='%23ffe9bd' opacity='0.97'/%3E%3Ccircle cx='644' cy='55' r='1.5' fill='%23ffffff' opacity='0.76'/%3E%3Ccircle cx='319' cy='159' r='1.4' fill='%23ffd98a' opacity='0.62'/%3E%3Ccircle cx='199' cy='640' r='1.9' fill='%23ffe9bd' opacity='0.65'/%3E%3Ccircle cx='783' cy='621' r='1.9' fill='%23ffe9bd' opacity='0.72'/%3E%3Ccircle cx='470' cy='346' r='1.9' fill='%23e6eeff' opacity='0.70'/%3E%3Ccircle cx='273' cy='198' r='2.1' fill='%23e6eeff' opacity='0.50'/%3E%3Ccircle cx='578' cy='963' r='2.0' fill='%23ffffff' opacity='0.61'/%3E%3Ccircle cx='130' cy='460' r='2.1' fill='%23dfe8ff' opacity='0.53'/%3E%3Ccircle cx='464' cy='1058' r='1.4' fill='%23e6eeff' opacity='0.76'/%3E%3Ccircle cx='374' cy='385' r='1.8' fill='%23ffffff' opacity='0.89'/%3E%3Ccircle cx='924' cy='1039' r='1.8' fill='%23ffffff' opacity='0.82'/%3E%3Ccircle cx='804' cy='341' r='1.9' fill='%23dfe8ff' opacity='0.82'/%3E%3Ccircle cx='313' cy='424' r='2.0' fill='%23dfe8ff' opacity='0.46'/%3E%3Ccircle cx='391' cy='672' r='1.8' fill='%23e6eeff' opacity='0.57'/%3E%3Ccircle cx='142' cy='272' r='1.7' fill='%23ffffff' opacity='0.93'/%3E%3Ccircle cx='183' cy='442' r='1.6' fill='%23dfe8ff' opacity='0.53'/%3E%3Ccircle cx='950' cy='306' r='1.7' fill='%23dfe8ff' opacity='0.65'/%3E%3Ccircle cx='1054' cy='166' r='1.5' fill='%23ffffff' opacity='0.58'/%3E%3Ccircle cx='13' cy='914' r='1.5' fill='%23ffffff' opacity='0.61'/%3E%3Ccircle cx='461' cy='406' r='1.9' fill='%23ffd98a' opacity='0.97'/%3E%3Ccircle cx='945' cy='1045' r='2.0' fill='%23dfe8ff' opacity='0.86'/%3E%3Ccircle cx='989' cy='858' r='2.2' fill='%23dfe8ff' opacity='0.89'/%3E%3Ccircle cx='438' cy='434' r='1.8' fill='%23ffffff' opacity='0.67'/%3E%3Ccircle cx='74' cy='230' r='1.5' fill='%23ffffff' opacity='0.64'/%3E%3Ccircle cx='113' cy='623' r='1.8' fill='%23ffe9bd' opacity='0.97'/%3E%3Ccircle cx='28' cy='962' r='1.9' fill='%23e6eeff' opacity='0.53'/%3E%3Ccircle cx='1051' cy='663' r='1.8' fill='%23dfe8ff' opacity='0.51'/%3E%3Ccircle cx='1092' cy='513' r='1.8' fill='%23ffffff' opacity='0.50'/%3E%3Ccircle cx='825' cy='814' r='1.8' fill='%23ffe9bd' opacity='0.83'/%3E%3Ccircle cx='25' cy='1046' r='1.8' fill='%23ffe9bd' opacity='0.53'/%3E%3Cpath d='M972 807L973.5 812.2L979 813L973.5 814.4L972 819L971.3 814.4L966 813L971.3 812.2Z' fill='%23ffffff' opacity='.9'/%3E%3Cpath d='M921 744L921.7 749.0L927 750L921.7 751.2L921 756L919.5 751.2L915 750L919.5 749.0Z' fill='%23ffd98a' opacity='.9'/%3E%3Cpath d='M966 397L967.5 401.7L972 403L967.5 403.9L966 409L965.4 403.9L961 403L965.4 401.7Z' fill='%23ffffff' opacity='.9'/%3E%3Cpath d='M835 370L835.7 375.2L841 376L835.7 377.3L835 382L833.6 377.3L829 376L833.6 375.2Z' fill='%23fff1c9' opacity='.9'/%3E%3Cpath d='M862 867L863.6 873.3L870 875L863.6 876.1L862 883L860.8 876.1L854 875L860.8 873.3Z' fill='%23fff1c9' opacity='.9'/%3E%3Cpath d='M244 535L245.3 541.2L252 543L245.3 544.1L244 551L242.5 544.1L236 543L242.5 541.2Z' fill='%23fff1c9' opacity='.9'/%3E%3Cpath d='M846 516L847.0 520.6L852 522L847.0 522.7L846 527L844.9 522.7L840 522L844.9 520.6Z' fill='%23ffffff' opacity='.9'/%3E%3C/svg%3E");
     background-size: 1100px 1100px;
-    animation: twinkle 11s ease-in-out -4s infinite alternate;
 }
-@keyframes twinkle { from { opacity: .55; } to { opacity: 1; } }
 
 /* the centre-pieces, lying under the list: a full moon by night, one great bloom by day.
    Both are held back in strength so the type on top of them stays readable. */
@@ -381,7 +381,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
         var(--shadow);
     transition: --light .35s ease, box-shadow .3s ease;
 }
-.glass:hover { --light: 1; }
+/* the light follows a pointer. A finger has none, and on a touch screen :hover sticks to whatever was last
+   tapped - which would have every tapped row repainting itself for a light that is never seen. */
+@media (hover: hover) {
+    .glass:hover { --light: 1; }
+}
 
 /* refractive rim: bright where light would catch the top-left and bottom-right edges */
 .glass::before {
@@ -521,6 +525,9 @@ h1 {
     user-select: none;
     -webkit-touch-callout: none;
     transition: transform .3s var(--spring), --light .35s ease, box-shadow .3s ease;
+    /* A row is pressed (it sinks), lifted (it swells) and dropped, and each change of size would otherwise have it
+       drawn again at the new scale - mid-gesture, which is when a late drawing shows. This says: keep the picture. */
+    will-change: transform;
 }
 /* held: the row sinks a little while the press is being counted */
 .todo.holding {
@@ -706,48 +713,98 @@ textarea.edit-field:focus-visible { outline: none; }
 
 /* ---------- priority: iridescent glow ---------- */
 
-/* the ring: a 1.5px band of slowly turning thin-film colour */
-.todo.priority::before {
-    padding: 1.5px;
-    background: conic-gradient(from var(--spin), var(--irid-stops));
-    animation: spin 7s linear infinite;
-    z-index: 1;
-}
-/* the halo: the same colours, blurred, then masked so it blooms *outside* the row
-   and only faintly tints the glass under the text */
-.todo.priority::after {
-    --halo: 34px;
-    content: "";
+/* The colour is one small picture of a conic gradient (app.js paints it from the --irid tokens and hands it over
+   as --irid-film), stretched over a square big enough to cover the row whichever way it is turned, and turned by
+   the compositor. Nothing is repainted while it turns. It used to be a gradient whose angle was animated instead,
+   which had the whole row - glass, text and all - drawn afresh on every frame for as long as the app was open.
+   A small picture, stretched, also costs the graphics chip next to nothing to hold; the gradient, drawn at full
+   size, costs megabytes for every priority row. */
+.film {
     position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 150%;                                    /* without container units: enough for a row wider than it is tall */
+    width: calc(100cqw + 100cqh);                   /* always enough */
+    width: calc(hypot(100cqw, 100cqh) + 8px);       /* just enough: the diagonal of the row */
+    /* …in whole, even pixels. A size with a fraction in it and the browser stops treating this as "a picture,
+       stretched" and paints it out at full size instead - a dozen times the memory. (Measured, not guessed.) */
+    width: round(up, calc(hypot(100cqw, 100cqh) + 8px), 2px);
+    aspect-ratio: 1;
+    background: var(--irid-film, conic-gradient(var(--irid-stops))) center / 100% 100% no-repeat;
+    transform: translate(-50%, -50%);
+    animation: turn 7s linear infinite;
+    will-change: transform;
+}
+@keyframes turn {
+    from { transform: translate(-50%, -50%) rotate(0turn); }
+    to   { transform: translate(-50%, -50%) rotate(1turn); }
+}
+
+.ring, .halo { display: none; position: absolute; pointer-events: none; }
+.todo.priority::before { content: none; }           /* the ring takes the place of the plain rim */
+
+/* the ring: a 1.5px band of slowly turning thin-film colour */
+.todo.priority .ring {
+    display: block;
+    inset: 0;
+    z-index: 1;
+    padding: 1.5px;
+    border-radius: inherit;             /* shapes the mask: only the rounded band shows, so the film needs no clip besides */
+    container-type: size;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+/* the halo: the same colours filling the row's own shape, blurred, then masked so it blooms *outside* the row
+   and only faintly tints the glass under the text */
+.todo.priority .halo {
+    --halo: 34px;
+    display: block;
     inset: calc(var(--halo) * -1);
     padding: var(--halo);
     z-index: -1;
     border-radius: calc(var(--radius) + var(--halo));
-    background: conic-gradient(from var(--spin), var(--irid-stops)) content-box;
     filter: blur(13px);
     -webkit-mask: linear-gradient(rgba(0, 0, 0, var(--halo-inside)) 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask: linear-gradient(rgba(0, 0, 0, var(--halo-inside)) 0 0) content-box exclude, linear-gradient(#000 0 0);
     opacity: var(--halo-opacity);
-    animation: spin 7s linear infinite;
-    pointer-events: none;
 }
-@keyframes spin { to { --spin: 360deg; } }
+.halo-shape {
+    display: block;
+    position: relative;
+    height: 100%;
+    border-radius: var(--radius);
+    overflow: hidden;
+    container-type: size;
+}
 
 /* ---------- drag & drop ---------- */
 
 .todo-list.is-dragging .todo:not(.dragging) { transition: transform .22s var(--ease), --light .35s ease; }
-.todo.dragging {
-    z-index: 5;
-    cursor: grabbing;
-    box-shadow:
-        inset 0 1px 0 var(--edge-hi),
-        inset 0 0 0 1px var(--edge-ring),
-        var(--shadow-lift);
-    transition: box-shadow .2s ease;
-}
+.todo.dragging { z-index: 5; cursor: grabbing; transition: none; }      /* it keeps to the finger, with no glide of its own */
 .todo.dragging .grip { cursor: grabbing; color: var(--ink); }
-.todo.dragging.settling { transition: transform .22s var(--ease), box-shadow .22s ease; }
+.todo.dragging.settling { transition: transform .22s var(--ease); }
+
+/* A lifted row casts a deeper shadow. The shadow is a layer of its own that fades in and out, so the row itself -
+   glass, text and all - is not drawn again at any point in a drag. */
+.lift {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: inherit;
+    box-shadow: var(--shadow-lift);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .22s ease, visibility 0s .22s;
+    pointer-events: none;
+}
+.todo.dragging .lift { opacity: 1; visibility: visible; will-change: opacity; transition: opacity .2s ease; }
+.todo.dragging.settling .lift { opacity: 0; transition: opacity .22s ease; }
+
+/* while a row is in the hand, the fireflies and the priority colours hold still: the drag gets everything */
+html.no-select .spark, html.no-select .film { animation-play-state: paused; }
+
 .todo-list.no-anim .todo { transition: none !important; }
 html.no-select, html.no-select * { user-select: none !important; -webkit-user-select: none !important; cursor: grabbing !important; }
 
@@ -936,6 +993,7 @@ html.no-select, html.no-select * { user-select: none !important; -webkit-user-se
 
 /* the reminder editor */
 .presets { display: flex; flex-wrap: wrap; gap: 8px; padding-inline: 4px; }
+.presets .pill { flex: 1 1 auto; }      /* the three share the row between them */
 .pill {
     min-height: 38px;
     padding: 0 14px;
@@ -951,7 +1009,7 @@ html.no-select, html.no-select * { user-select: none !important; -webkit-user-se
 .when { display: grid; grid-template-columns: 1.3fr 1fr; gap: 10px; margin-top: 18px; padding-inline: 4px; }
 .field { display: grid; gap: 6px; min-width: 0; }
 .field-cap { padding-left: 4px; font-size: .8rem; color: var(--ink-2); }
-.field input {
+.field input, .field-btn {
     width: 100%;
     min-width: 0;
     height: 48px;
@@ -969,7 +1027,22 @@ html.no-select, html.no-select * { user-select: none !important; -webkit-user-se
     user-select: text;
 }
 .field input::-webkit-date-and-time-value { text-align: left; }
-.field input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.field input:focus-visible, .field-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* the time is a button in the shape of a field: it opens the clock */
+.field-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    text-align: left;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: transform .25s var(--spring);
+}
+.field-btn:active { transform: scale(.97); }
+.field-icon { flex: none; display: grid; color: var(--ink-2); }
 
 .remind-hint { min-height: 1.4em; margin: 10px 8px 0; font-size: .9rem; color: var(--ink-2); }
 .remind-hint.bad { color: var(--danger); }
@@ -1004,9 +1077,167 @@ html.no-select, html.no-select * { user-select: none !important; -webkit-user-se
 .tone .pill { flex: none; min-height: 34px; padding: 0 12px; font-size: .84rem; }
 .tone .pill[hidden] { display: none; }
 
-.tone-note, .remind-note { margin: 10px 8px 0; font-size: .82rem; line-height: 1.45; color: var(--ink-2); }
-.tone-note { color: var(--danger); }
+.tone-note { margin: 10px 8px 0; font-size: .82rem; line-height: 1.45; color: var(--danger); }
 .tone-note[hidden] { display: none; }
+
+/* the clock: the reminder's time, read off a dial of the same glass.
+   The time stands above it in the masthead's thin numerals; the half being set is the lit one. */
+#view-clock { animation: view-in .32s var(--ease) both; }
+@keyframes view-in { from { opacity: 0; transform: scale(.97); } }
+
+.clock-read { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 2px 4px 0; }
+.clock-seg {
+    flex: 0 1 96px;
+    min-width: 0;
+    height: 80px;
+    border-radius: 22px;
+    font-size: 3.6rem;
+    font-weight: 200;
+    line-height: 1;
+    letter-spacing: -.035em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+    transition: background .25s ease, box-shadow .25s ease, transform .3s var(--spring);
+}
+.clock-seg span { display: inline-block; padding: 0 .05em; }
+.clock-seg:active { transform: scale(.96); }
+.clock-seg[aria-pressed="true"] { background: var(--hover-fill); box-shadow: inset 0 0 0 1px var(--edge-ring); }
+.clock-seg[aria-pressed="true"] span {
+    background: linear-gradient(180deg, var(--title-a) 25%, var(--title-b));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+.clock-colon { font-size: 3rem; font-weight: 200; line-height: 1; color: var(--ink-3); transform: translateY(-.07em); }
+
+.clock-half { display: grid; gap: 6px; margin-left: 10px; }
+.clock-half[hidden] { display: none; }
+.clock-half .pill {
+    min-width: 54px;
+    min-height: 37px;
+    padding: 0 10px;
+    font-size: .84rem;
+    font-weight: 600;
+    transition: transform .25s var(--spring), background .2s ease, color .2s ease, box-shadow .2s ease;
+}
+.clock-half .pill[aria-pressed="true"] { background: var(--solid-bg); color: var(--solid-ink); box-shadow: var(--solid-shadow); }
+
+.dial {
+    --reach: 37.5%;                     /* how far out the numerals sit and the hand's knob rides (app.js agrees) */
+    position: relative;
+    width: min(252px, 100%);
+    aspect-ratio: 1;
+    margin: 20px auto 4px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, calc(var(--specular) * .5)), transparent 62%),
+        var(--hover-fill);
+    box-shadow:
+        inset 0 1px 0 var(--edge-hi),
+        inset 0 -1px 0 var(--edge-lo),
+        inset 0 0 0 1px var(--edge-ring),
+        inset 0 -26px 30px -24px var(--pool);
+    cursor: pointer;
+    touch-action: none;                 /* a finger on the dial turns the hand; it never scrolls the sheet */
+    transition: --turn .45s var(--spring);
+}
+.dial.inner { --reach: 22%; }           /* a twenty-four-hour dial keeps midnight and the afternoon on a ring inside */
+.dial.turning { transition: none; }     /* being dragged: the hand keeps to the finger */
+.dial:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
+
+/* sixty fine ticks round the rim, every fifth a little stronger */
+.dial::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    background:
+        repeating-conic-gradient(from -.9deg, var(--ink-2) 0 1.8deg, transparent 1.8deg 30deg),
+        repeating-conic-gradient(from -.5deg, var(--ink-3) 0 1deg, transparent 1deg 6deg);
+    -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 5px), #000 calc(100% - 4.5px));
+    mask: radial-gradient(closest-side, transparent calc(100% - 5px), #000 calc(100% - 4.5px));
+    opacity: .45;
+    pointer-events: none;
+}
+
+.dial-hand {
+    position: absolute;
+    left: calc(50% - 1px);
+    bottom: 50%;
+    z-index: 1;
+    width: 2px;
+    height: var(--reach);
+    border-radius: 2px;
+    background: var(--title-b);
+    transform-origin: 50% 100%;
+    transform: rotate(var(--turn));
+    transition: height .3s var(--ease);
+    pointer-events: none;
+}
+.dial-hand::after {                     /* the pin it turns on */
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    width: 8px;
+    height: 8px;
+    margin-left: -4px;
+    border-radius: 50%;
+    background: var(--title-b);
+}
+.dial-knob {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 42px;
+    height: 42px;
+    margin: -21px 0 0 -21px;
+    border-radius: 50%;
+    background: var(--solid-bg);
+    box-shadow: var(--solid-shadow);
+    transform: rotate(calc(var(--turn) * -1));     /* turned back, so its light always falls from above */
+}
+.dial-knob::after {                     /* between two numerals, a pip marks the exact minute */
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 5px;
+    height: 5px;
+    margin: auto;
+    border-radius: 50%;
+    background: var(--solid-ink);
+    opacity: 0;
+    transition: opacity .2s ease;
+}
+.dial.between .dial-knob::after { opacity: 1; }
+
+/* the numerals: the hours, and behind them the minutes — one ring shows at a time */
+.dial-ring {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .4s var(--ease);
+}
+.dial-ring.off { opacity: 0; transform: scale(.8); }
+#dial-minutes.off { transform: scale(1.1); }      /* no larger: past the sheet's padding it would make the sheet scroll sideways */
+.dial-num {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    font-size: 1.06rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    transition: color .15s ease .1s, opacity .15s ease;    /* a beat, while the knob gets there */
+}
+.dial-num.inner { font-size: .86rem; color: var(--ink-2); }
+.dial-num.is-on { color: var(--solid-ink); font-weight: 600; }
+.dial-num.under { opacity: 0; }         /* half hidden by the knob: better not shown at all */
+.dial.turning .dial-num { transition: none; }
 
 .sheet-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
 .btn {
@@ -1099,11 +1330,16 @@ html.modal-open .toast { margin-left: calc(var(--sbw, 0px) / -2); }
     .todo-text, textarea.edit-field { font-size: 1rem; }
 }
 
+@media (max-width: 350px) {
+    .presets { gap: 6px; }              /* the three quick times still fit on one row */
+    .presets .pill { padding: 0 8px; font-size: .84rem; }
+}
+
 /* ---------- Windows high contrast / forced colours ---------- */
 
 @media (forced-colors: active) {
     .glass { border: 1px solid CanvasText; }
-    .glass::before, .todo.priority::after, .backdrop { display: none; }
+    .glass::before, .todo.priority .ring, .todo.priority .halo, .lift, .backdrop { display: none; }
     .todo.priority { border: 3px double Highlight; padding: 6px 6px 6px 4px; }
     .todo.editing { border: 2px solid Highlight; padding: 7px 7px 7px 5px; }
     .check { border: 2px solid CanvasText; }
@@ -1113,7 +1349,14 @@ html.modal-open .toast { margin-left: calc(var(--sbw, 0px) / -2); }
     .composer:not(:has(#todo-input:not(:placeholder-shown))) .add { opacity: 1; }
     .burst svg, .menu-item.is-on .menu-icon svg { fill: Highlight; stroke: Highlight; filter: none; }
     .modal::backdrop { background: Canvas; opacity: .85; }
-    .remind, .pill, .btn, .field input, .tone, .tone-play, .menu-icon, .alarm-bell { border: 1px solid ButtonText; }
+    .remind, .pill, .btn, .field input, .field-btn, .tone, .tone-play, .menu-icon, .alarm-bell, .dial { border: 1px solid ButtonText; }
+    .clock-seg[aria-pressed="true"] { border: 2px solid Highlight; }
+    .clock-seg[aria-pressed="true"] span { -webkit-text-fill-color: CanvasText; color: CanvasText; background: none; }
+    .clock-half .pill[aria-pressed="true"] { background: Highlight; color: HighlightText; }
+    .dial-hand, .dial-hand::after, .dial-knob { background: Highlight; }
+    .dial-num.is-on { color: HighlightText; }
+    .dial-knob::after { background: HighlightText; }
+    .dial::before { display: none; }
     h1 { -webkit-text-fill-color: CanvasText; color: CanvasText; background: none; }
 }
 

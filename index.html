@@ -173,6 +173,8 @@
             <circle class="bcore" r="60"/>
             <g class="bstamen"><circle cx="44" cy="0" r="3.4"/><circle cx="39.6" cy="19.1" r="3.4"/><circle cx="27.4" cy="34.4" r="3.4"/><circle cx="9.8" cy="42.9" r="3.4"/><circle cx="-9.8" cy="42.9" r="3.4"/><circle cx="-27.4" cy="34.4" r="3.4"/><circle cx="-39.6" cy="19.1" r="3.4"/><circle cx="-44" cy="0" r="3.4"/><circle cx="-39.6" cy="-19.1" r="3.4"/><circle cx="-27.4" cy="-34.4" r="3.4"/><circle cx="-9.8" cy="-42.9" r="3.4"/><circle cx="9.8" cy="-42.9" r="3.4"/><circle cx="27.4" cy="-34.4" r="3.4"/><circle cx="39.6" cy="-19.1" r="3.4"/><circle cx="25.4" cy="9.2" r="3"/><circle cx="13.5" cy="23.4" r="3"/><circle cx="-4.7" cy="26.6" r="3"/><circle cx="-20.7" cy="17.4" r="3"/><circle cx="-27" cy="0" r="3"/><circle cx="-20.7" cy="-17.4" r="3"/><circle cx="-4.7" cy="-26.6" r="3"/><circle cx="13.5" cy="-23.4" r="3"/><circle cx="25.4" cy="-9.2" r="3"/><circle cx="7.8" cy="7.8" r="2.6"/><circle cx="-7.8" cy="7.8" r="2.6"/><circle cx="-7.8" cy="-7.8" r="2.6"/><circle cx="7.8" cy="-7.8" r="2.6"/></g>
         </svg>
+        <!-- the grain lies under the vines, not over them: laid over the fireflies, it would have to be held as a full-screen layer of its own -->
+        <span class="grain"></span>
         <svg class="flora flora-l" viewBox="0 0 260 1200" preserveAspectRatio="xMinYMid slice" focusable="false">
             <path class="stem" d="M28 1240 C1 1141 31 1057 88 958 C132 863 79 782 52 687 C-12 588 92 502 24 403 C89 306 84 223 63 126 C79 19 -32 -73 16 -181"/>
             <path class="stem" d="M11 1240 C5 1143 -18 1059 13 962 C83 878 98 805 29 721 C77 643 77 576 48 498 C23 404 43 323 81 229 C52 132 4 49 64 -48 C101 -144 52 -227 66 -323"/>
@@ -224,15 +226,6 @@
             <use href="#fl" transform="translate(38 1108) rotate(317) scale(0.51)"/>
             <use href="#fl" transform="translate(94 968) rotate(234) scale(0.48)"/>
             <use href="#fl" transform="translate(72 234) rotate(231) scale(0.56)"/>
-            <circle class="spark" cx="113" cy="256" r="2.3" style="--d:5.9s"/>
-            <circle class="spark" cx="147" cy="644" r="2.1" style="--d:1.9s"/>
-            <circle class="spark" cx="138" cy="1027" r="1.6" style="--d:0.5s"/>
-            <circle class="spark" cx="77" cy="660" r="2.1" style="--d:2.9s"/>
-            <circle class="spark" cx="24" cy="971" r="1.3" style="--d:4.8s"/>
-            <circle class="spark" cx="42" cy="402" r="2.1" style="--d:0.8s"/>
-            <circle class="spark" cx="39" cy="620" r="2.1" style="--d:5.0s"/>
-            <circle class="spark" cx="110" cy="1135" r="1.8" style="--d:5.7s"/>
-            <circle class="spark" cx="31" cy="266" r="1.8" style="--d:1.7s"/>
         </svg>
         <svg class="flora flora-r" viewBox="0 0 260 1200" preserveAspectRatio="xMinYMid slice" focusable="false">
             <path class="stem" d="M47 1240 C41 1126 19 1029 86 916 C28 835 89 767 60 686 C48 593 56 513 54 420 C87 338 5 268 25 186 C-37 91 67 11 27 -83"/>
@@ -285,6 +278,21 @@
             <use href="#fl" transform="translate(15 567) rotate(111) scale(0.52)"/>
             <use href="#fl" transform="translate(75 750) rotate(191) scale(0.51)"/>
             <use href="#fl" transform="translate(35 225) rotate(97) scale(0.60)"/>
+        </svg>
+        <!-- The fireflies have svgs of their own, laid exactly over the vines. An svg with anything animated inside it is held
+             as a layer by itself; kept apart, the vines can be painted into the backdrop, and these two layers are all but empty. -->
+        <svg class="flora flora-l" viewBox="0 0 260 1200" preserveAspectRatio="xMinYMid slice" focusable="false">
+            <circle class="spark" cx="113" cy="256" r="2.3" style="--d:5.9s"/>
+            <circle class="spark" cx="147" cy="644" r="2.1" style="--d:1.9s"/>
+            <circle class="spark" cx="138" cy="1027" r="1.6" style="--d:0.5s"/>
+            <circle class="spark" cx="77" cy="660" r="2.1" style="--d:2.9s"/>
+            <circle class="spark" cx="24" cy="971" r="1.3" style="--d:4.8s"/>
+            <circle class="spark" cx="42" cy="402" r="2.1" style="--d:0.8s"/>
+            <circle class="spark" cx="39" cy="620" r="2.1" style="--d:5.0s"/>
+            <circle class="spark" cx="110" cy="1135" r="1.8" style="--d:5.7s"/>
+            <circle class="spark" cx="31" cy="266" r="1.8" style="--d:1.7s"/>
+        </svg>
+        <svg class="flora flora-r" viewBox="0 0 260 1200" preserveAspectRatio="xMinYMid slice" focusable="false">
             <circle class="spark" cx="57" cy="592" r="1.9" style="--d:4.7s"/>
             <circle class="spark" cx="58" cy="1155" r="1.2" style="--d:4.7s"/>
             <circle class="spark" cx="94" cy="1081" r="1.4" style="--d:4.1s"/>
@@ -295,7 +303,6 @@
             <circle class="spark" cx="149" cy="776" r="2.3" style="--d:1.2s"/>
             <circle class="spark" cx="116" cy="878" r="1.3" style="--d:4.9s"/>
         </svg>
-        <span class="grain"></span>
     </div>
 
     <main class="shell">
@@ -369,12 +376,11 @@
                         <button type="button" class="pill" data-preset="15m">In 15 min</button>
                         <button type="button" class="pill" data-preset="1h">In 1 hour</button>
                         <button type="button" class="pill" data-preset="3h">In 3 hours</button>
-                        <button type="button" class="pill" data-preset="tomorrow" id="preset-tomorrow">Tomorrow</button>
                     </div>
 
                     <div class="when">
                         <label class="field"><span class="field-cap">Date</span><input type="date" id="remind-date" aria-describedby="remind-hint"></label>
-                        <label class="field"><span class="field-cap">Time</span><input type="time" id="remind-time" aria-describedby="remind-hint"></label>
+                        <div class="field"><span class="field-cap" id="remind-time-cap">Time</span><button type="button" class="field-btn" id="remind-time" aria-labelledby="remind-time-cap remind-time" aria-describedby="remind-hint"><span id="remind-time-text"></span><span class="field-icon" data-icon="clock"></span></button></div>
                     </div>
                     <p class="remind-hint" id="remind-hint"></p>
 
@@ -386,11 +392,35 @@
                         <input type="file" id="tone-file" class="sr-only" accept="audio/*" tabindex="-1" aria-hidden="true">
                     </div>
                     <p class="tone-note" id="tone-note" role="alert" hidden></p>
-                    <p class="remind-note" id="remind-note"></p>
 
                     <div class="sheet-actions">
                         <button type="button" class="btn quiet danger" id="remind-clear" hidden>Remove reminder</button>
                         <button type="button" class="btn solid" id="remind-save">Set reminder</button>
+                    </div>
+                </section>
+
+                <!-- the clock the reminder's time is read off: the hours first, then the minutes -->
+                <section id="view-clock" hidden>
+                    <h2 class="sr-only" id="clock-title">Choose a time</h2>
+                    <div class="clock-read">
+                        <button type="button" class="clock-seg" id="clock-hour"><span></span></button>
+                        <span class="clock-colon" aria-hidden="true">:</span>
+                        <button type="button" class="clock-seg" id="clock-minute"><span></span></button>
+                        <div class="clock-half" id="clock-half" role="group" aria-label="Before or after noon" hidden>
+                            <button type="button" class="pill" data-half="am"></button>
+                            <button type="button" class="pill" data-half="pm"></button>
+                        </div>
+                    </div>
+
+                    <div class="dial" id="dial" role="slider" tabindex="0">
+                        <div class="dial-hand" aria-hidden="true"><span class="dial-knob"></span></div>
+                        <div class="dial-ring" id="dial-hours" aria-hidden="true"></div>
+                        <div class="dial-ring off" id="dial-minutes" aria-hidden="true"></div>
+                    </div>
+
+                    <div class="sheet-actions">
+                        <button type="button" class="btn quiet" id="clock-cancel">Cancel</button>
+                        <button type="button" class="btn solid" id="clock-done">Done</button>
                     </div>
                 </section>
             </div>
